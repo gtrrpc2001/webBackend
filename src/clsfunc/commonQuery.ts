@@ -38,7 +38,7 @@ export class commonQuery{
         .select(select)    
         .leftJoin(parentsEntity,'b','a.eq = b.eq')    
         .where({"eq":empid})    
-        .getRawMany()    
+        .getRawOne()    
         console.log(result)
         const jsonValue = (result.length != 0 && empid != null)? result : 'result = ' + boolResult.toString()     
         return commonFun.converterJson(jsonValue);
