@@ -149,12 +149,12 @@ export class ecg_csv_ecgdata_arrService {
                             .where({"eq":empid})
                             .andWhere({"writetime":MoreThan(startDate)})
                             .andWhere({"writetime":LessThan(endDate)})
-                            .getRawMany()
+                            .getRawOne()
       let Value = (result.length != 0 && empid != null)? commonFun.converterJson(result) : commonFun.converterJson('result = ' + '0')      
       const info = await commonQuery.getProfile(this.userRepository,parentsEntity,empid)
       if(result.length != 0 && !info.includes('result')){
-       const arr = Value?.replace('[{','')       
-       const profile = info?.replace('}]',',')
+       const arr = Value?.replace('{','')       
+       const profile = info?.replace('}',',')
        Value =  profile + arr
       }
       console.log(Value)                                                    
