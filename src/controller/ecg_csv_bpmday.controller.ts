@@ -23,6 +23,14 @@ export class ecg_csv_bpmdayController {
     return this.ecg_csv_bpmdayService.BpmData(eq,startDate,endDate);
   }
 
+  @Get("/webBpm")
+ async getWebBpm(       
+   @Query('eq') eq:string,
+   @Query('startDate') startDate:string,
+   @Query('endDate') endDate:string): Promise<string> {       
+    return this.ecg_csv_bpmdayService.getWebBpm(eq,startDate,endDate);
+  }
+
   @Get("/test")
  async getTest(       
    @Query('eq') eq:string): Promise<string> {       
