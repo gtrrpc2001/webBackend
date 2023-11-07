@@ -91,7 +91,7 @@ export class ecg_csv_bpmdayService {
     }
     
     async getWebBpm (empid:string,startDate:string,endDate:string):Promise<string>{
-      const select = 'bpm,writetime'
+      const select = 'bpm,hrv,writetime'
       const result = await commonQuery.whereIfResult(this.ecg_csv_bpmdayRepository,this.table,select,empid,startDate,endDate);  
       return commonFun.converterJson(result)
     }
