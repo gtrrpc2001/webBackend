@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository,MoreThan,LessThan } from 'typeorm';
 import { ecg_csv_ecgdataDTO } from "src/dto/ecg_csv_ecgdata.dto";
 import { ecg_csv_bpmdayEntity } from 'src/entity/ecg_csv_bpmday.entity';
 import { commonFun } from 'src/clsfunc/commonfunc';
