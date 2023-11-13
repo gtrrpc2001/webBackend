@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository,MoreThan,LessThan } from 'typeorm';
 import { ecg_csv_ecgdataDTO } from "src/dto/ecg_csv_ecgdata.dto";
 import { ecg_csv_bpmdayEntity } from 'src/entity/ecg_csv_bpmday.entity';
 import { commonFun } from 'src/clsfunc/commonfunc';
@@ -91,9 +91,19 @@ export class ecg_csv_bpmdayService {
     }
     
     async getWebBpm (empid:string,startDate:string,endDate:string):Promise<string>{
-      const select = 'bpm,writetime'
-      const result = await commonQuery.whereIfResult(this.ecg_csv_bpmdayRepository,this.table,select,empid,startDate,endDate);  
-      return commonFun.converterJson(result)
+      try{ 
+        const select = 'bpm,hrv,writetime'
+        const result = await this.ecg_csv_bpmdayRepository.createQueryBuilder(this.table)
+                        .select(select)
+                        .where({"eq":empid})
+                        .andWhere({'writetime':MoreThan(startDate)})
+                        .andWhere({'writetime':LessThan(endDate)})
+                        .orderBy('MID(writetime,12,8)','ASC')
+                        .getRawMany()
+        return commonFun.converterJson(result)
+      }catch(E){
+        console.log(E)
+      }    
     }
 
 }
