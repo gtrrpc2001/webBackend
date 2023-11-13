@@ -39,4 +39,14 @@ export class ecg_csv_ecgdata_arrController {
     return this.ecg_csv_ecgdata_arrService.countArr(eq,startDate,endDate);
   }
 
+  @Get("/graphArrCnt")
+ async getGraphArrCount(   
+  @Query('eq') eq:string,
+  @Query('startDate') startDate:string,
+  @Query('endDate') endDate:string,
+  @Query('len') len:number
+  ): Promise<any> {       
+    return await this.ecg_csv_ecgdata_arrService.graphArrCount(eq,startDate,endDate,len);
+  }
+
 }

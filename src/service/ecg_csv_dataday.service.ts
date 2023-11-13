@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { LessThan, MoreThan, Repository } from 'typeorm';
 import { ecg_csv_ecgdataDTO } from "src/dto/ecg_csv_ecgdata.dto";
 import { ecg_csv_datadayEntity } from 'src/entity/ecg_csv_dataday.entity';
 import { commonFun } from 'src/clsfunc/commonfunc';
@@ -111,6 +111,24 @@ export class ecg_csv_datadayService {
     const result = await commonQuery.whereIfResult(this.ecg_csv_datadayRepository,this.table,this.select,empid,startDate,endDate);  
     const Value = (result.length != 0 && empid != null)? commonFun.convertCsv(commonFun.converterJson(result)) : commonFun.converterJson('result = ' + '0')
     return Value;    
+    }
+
+    async getWebSumDayData(empid:string,startDate:string,endDate:string,len:number): Promise<string>{
+      try{
+        const startLen = commonFun.getStartLen(len)
+        this.select = `MID(writetime,${startLen},2) writetime, SUM(cal) cal,SUM(calexe) calexe,SUM(step) step,SUM(distanceKM) distanceKM`
+        const result = await this.ecg_csv_datadayRepository.createQueryBuilder(this.table)
+                        .select(this.select)
+                        .where({'eq':empid})
+                        .andWhere({'writetime':MoreThan(startDate)})
+                        .andWhere({'writetime':LessThan(endDate)})
+                        .groupBy(`MID(writetime,${startLen},2)`)
+                        .getRawMany()
+        const Value = (result.length != 0 && empid != null)? commonFun.converterJson(result) : commonFun.converterJson('result = ' + '0')
+        return Value;                    
+      }catch(E){
+        console.log(E)
+      }
     }
    
 

@@ -23,6 +23,15 @@ export class ecg_csv_datadayController {
     return this.ecg_csv_datadayService.getDay('calandDistanceData',eq,startDate,endDate);
   }
 
+  @Get("/webDay")
+ async getWebDayData(       
+   @Query('eq') eq:string,
+   @Query('startDate') startDate:string,
+   @Query('endDate') endDate:string,
+   @Query('len') len:number): Promise<string> {       
+    return await this.ecg_csv_datadayService.getWebSumDayData(eq,startDate,endDate,len);
+  }
+
   @Get("/test")
  async getTest(       
    @Query('eq') eq:string): Promise<any> {       

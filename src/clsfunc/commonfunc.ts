@@ -72,5 +72,16 @@ import { parentsEntity } from 'src/entity/parents.entity';
       })
       return changeEcg
       }
+
+      static getStartLen(len:number):number{
+        switch(len){
+          case 10 :
+            return 9
+          case 7 :
+            return 6
+          case 13 :
+            return 12      
+        }
+     }
     
 }
