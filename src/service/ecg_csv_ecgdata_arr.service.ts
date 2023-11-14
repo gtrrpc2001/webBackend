@@ -111,6 +111,32 @@ export class ecg_csv_ecgdata_arrService {
       }                 
     
    }
+
+   async arrWritetime (empid:string,startDate:string,endDate:string): Promise<string>{        
+    try{
+      let result
+      if(endDate != ''){
+        result = await this.ecg_csv_ecgdata_arrRepository.createQueryBuilder('ecg_csv_ecgdata_arr')
+                            .select('writetime')    
+                            .where({"eq":empid})
+                            .andWhere({"writetime":MoreThan(startDate)})
+                            .andWhere({"writetime":LessThan(endDate)})
+                            .getRawMany()
+      }else{
+        result = await this.ecg_csv_ecgdata_arrRepository.createQueryBuilder()
+                            .select('ecgpacket')    
+                            .where({"eq":empid})
+                            .andWhere({"writetime":startDate})
+                            .getRawMany()
+      }    
+      const Value = (result.length != 0 && empid != null)? commonFun.convertCsv(commonFun.converterJson(result)) : commonFun.converterJson('result = ' + '0')
+      console.log(empid)                                                    
+      return Value;    
+    } catch(E){
+        console.log(E)
+    }                 
+  
+  }
    
    async testArr (idx:number,empid:string,startDate:string,endDate:string): Promise<string>{        
       try{

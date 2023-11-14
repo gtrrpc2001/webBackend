@@ -22,6 +22,14 @@ export class ecg_csv_ecgdata_arrController {
     return this.ecg_csv_ecgdata_arrService.arrEcgData(eq,startDate,endDate);
   }
 
+  @Get("/arrWritetime")
+ async getArrWritetime(         
+  @Query('eq') eq:string,
+  @Query('startDate') startDate:string,
+  @Query('endDate') endDate:string): Promise<any> {       
+    return await this.ecg_csv_ecgdata_arrService.arrWritetime(eq,startDate,endDate);
+  }
+
   @Get("/test")
  async getTest(   
   @Query('idx') idx:number,    
