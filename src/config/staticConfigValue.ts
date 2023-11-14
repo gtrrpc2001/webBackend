@@ -5,5 +5,12 @@ export class staticConfigValue{
 
         return {path: configService.get<string>('FIREBASESDKPATH')}
     }
+
+    static getFirebase_sdk_ios = (configService:ConfigService) => { 
+                
+        return {
+           path: configService.get<string>('FIREBASESKDIOSPATH')
+        }
+    }
 }
     
