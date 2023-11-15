@@ -129,7 +129,7 @@ export class ecg_csv_ecgdata_arrService {
                             .andWhere({"writetime":startDate})
                             .getRawMany()
       }    
-      const Value = (result.length != 0 && empid != null)? commonFun.convertCsv(commonFun.converterJson(result)) : commonFun.converterJson('result = ' + '0')
+      const Value = (result.length != 0 && empid != null)? commonFun.converterJson(result) : commonFun.converterJson('result = ' + '0')
       console.log(empid)                                                    
       return Value;    
     } catch(E){
