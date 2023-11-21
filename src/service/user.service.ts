@@ -146,7 +146,7 @@ export class userService {
             // 보호자앱 phone 번호까지 로그인 할떄 체크 후 token update    
             let boolResult = false
             if(isDefined(empid) && isDefined(pw) && isDefined(phone)){    
-             boolResult = await this.guardianLoginCheck(empid,pw,phone)
+             boolResult = await this.(empid,pw,phone)
              console.log(`보호자앱 로그인 체크 ${boolResult}`)  
              
              if(boolResult && isDefined(token)){
@@ -163,7 +163,7 @@ export class userService {
                 let condition = `a.eq = b.eq and b.phone = ${phone}`
                 const result = await this.userRepository.createQueryBuilder('a')
                 .select(select)
-                .leftJoin(parentsEntity,'b',condition)
+                .innerJoin(parentsEntity,'b',condition)
                 .where({"eq":empid}).andWhere({"password":pw})
                 .getRawOne()
         
