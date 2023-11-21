@@ -146,7 +146,7 @@ export class userService {
             // 보호자앱 phone 번호까지 로그인 할떄 체크 후 token update    
             let boolResult = false
             if(isDefined(empid) && isDefined(pw) && isDefined(phone)){    
-             boolResult = await this.(empid,pw,phone)
+             boolResult = await this.guardianLoginCheck(empid,pw,phone)
              console.log(`보호자앱 로그인 체크 ${boolResult}`)  
              
              if(boolResult && isDefined(token)){
