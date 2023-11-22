@@ -1,17 +1,19 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository,MoreThan,LessThan } from 'typeorm';
+import { LessThan, MoreThan, MoreThanOrEqual, Repository } from 'typeorm';
 import { ecg_csv_ecgdataDTO } from "src/dto/ecg_csv_ecgdata.dto";
 import { ecg_csv_bpmdayEntity } from 'src/entity/ecg_csv_bpmday.entity';
 import { commonFun } from 'src/clsfunc/commonfunc';
 import { commonQuery } from 'src/clsfunc/commonQuery';
 import { ecg_raw_history_lastEntity } from 'src/entity/ecg_raw_history_last.entity';
+import { ecg_csv_ecgdata_arrEntity } from 'src/entity/ecg_csv_ecgdata_arr.entity';
 
 @Injectable()
 export class ecg_csv_bpmdayService {
   ecg_raws: ecg_csv_bpmdayEntity[] = [];    
   constructor(@InjectRepository(ecg_csv_bpmdayEntity) private ecg_csv_bpmdayRepository:Repository<ecg_csv_bpmdayEntity>,
-  @InjectRepository(ecg_raw_history_lastEntity) private ecg_raw_history_lastRepository:Repository<ecg_raw_history_lastEntity>
+  @InjectRepository(ecg_raw_history_lastEntity) private ecg_raw_history_lastRepository:Repository<ecg_raw_history_lastEntity>,
+  @InjectRepository(ecg_csv_ecgdata_arrEntity) private ecg_csv_ecgdata_arrRepository:Repository<ecg_csv_ecgdata_arrEntity>
   ){}
 
     table = 'ecg_csv_bpmday'
@@ -103,7 +105,44 @@ export class ecg_csv_bpmdayService {
         return commonFun.converterJson(result)
       }catch(E){
         console.log(E)
-      }    
+      }
+    }
+
+    async webGraphBpmHrvArr(empid:string,startDate:string,endDate:string): Promise<string>{
+      try{        
+        const subQuery = await this.subQueryArr(empid,startDate,endDate)
+        const result = await this.ecg_csv_bpmdayRepository.createQueryBuilder('a')
+                        .select('a.writetime,a.bpm,a.hrv,b.count')
+                        .leftJoin(subQuery,'b','MID(a.writetime,1,18) = MID(b.writetime,1,18)')
+                        .where({"eq":empid})
+                        .andWhere({"writetime":MoreThanOrEqual(startDate)})
+                        .andWhere({"writetime":LessThan(endDate)})                        
+                        .orderBy('writetime','ASC')
+                        .getRawMany()        
+        return commonFun.converterJson(result);                    
+      }catch(E){
+        console.log(E)
+      }
+
+    }
+
+    async subQueryArr(eq:string,writetime:string,endDate:string): Promise<string>{
+      const subSelect = 'COUNT(ecgpacket) COUNT,writetime'
+      try{
+        const result = await this.ecg_csv_ecgdata_arrRepository.createQueryBuilder()
+        .subQuery()
+        .select(subSelect)
+        .from(ecg_csv_ecgdata_arrEntity,'')
+        .where(`eq = '${eq}'`)
+        .andWhere(`writetime >= '${writetime}'`)
+        .andWhere(`writetime < '${endDate}'`)
+        .groupBy('writetime')
+        .having('COUNT(ecgpacket)')          
+        .getQuery()
+        return result
+      }catch(E){
+        console.log(E)
+      }
     }
 
 }
