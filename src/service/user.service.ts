@@ -163,7 +163,7 @@ export class userService {
                 let condition = `a.eq = b.eq and b.phone = ${phone}`
                 const result = await this.userRepository.createQueryBuilder('a')
                 .select(select)
-                .leftJoin(parentsEntity,'b',condition)
+                .innerJoin(parentsEntity,'b',condition)
                 .where({"eq":empid}).andWhere({"password":pw})
                 .getRawOne()
         
