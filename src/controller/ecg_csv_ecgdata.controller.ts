@@ -27,4 +27,23 @@ export class ecg_csv_ecgdataController {
     ): Promise<number[]> {       
      return this.ecg_csv_ecgdataService.getEcg(eq,startDate);
    }
+  
+@Get("/EcgTime")
+  async getEcgTime(
+  @Query('eq') eq:string,
+  @Query('startDate') startDate:string,
+  @Query('endDate') endDate:string,
+  ):Promise<string[]>{
+    return await this.ecg_csv_ecgdataService.getEcgTime(eq,startDate,endDate);
+  }
+
+  @Get("/GraphEcg")
+ async getGraphEcg(       
+   @Query('eq') eq:string,
+   @Query('startDate') startDate:string,
+   @Query('endDate') endDate:string,
+   ): Promise<number[]> {       
+    return await this.ecg_csv_ecgdataService.getGraphEcgValue(eq,startDate,endDate);
+  }
+  
 }
