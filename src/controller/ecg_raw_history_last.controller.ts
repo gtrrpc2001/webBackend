@@ -21,9 +21,8 @@ export class ecg_raw_history_lastController {
   }
 
   @Get("/webTable")
- async getTest(       
-   @Query('writetime') writetime:string): Promise<any> {       
-    return this.ecg_raw_history_lastService.gethistory_last(writetime);
+ async getTableListValue(): Promise<any> {       
+    return await this.ecg_raw_history_lastService.gethistory_last();
   }
 
 }
