@@ -1,8 +1,5 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-<<<<<<< HEAD
-import { Repository } from 'typeorm';
-=======
 import { MoreThanOrEqual, Repository, LessThan, LessThanOrEqual } from 'typeorm';
 >>>>>>> 7980c930b923926a324755ee1ae9d954445899b3
 import { ecg_csv_ecgdataEntity } from "src/entity/ecg_csv_ecgdata.entity";
