@@ -41,26 +41,29 @@ export class ecg_raw_history_lastService {
       const select = 'a.idx,a.eq,eqname,a.bpm,a.hrv,mid(a.temp,1,5) temp,'+
       'b.step step, b.distanceKM distanceKM, b.cal cal, b.calexe calexe, b.arrcnt arrcnt,a.timezone,'+
       'a.writetime,'+
-      'case '+ 
+      'case '+
       "when MID(a.timezone,1,1) = '-' then DATE_ADD(a.writetime,INTERVAL cast(MID(a.timezone,2,2) AS unsigned) + 9 HOUR)"+
-<<<<<<< HEAD
       " when MID(a.timezone,1,1) = '+' AND cast(MID(a.timezone,2,2) AS UNSIGNED) < 9 AND a.timezone NOT LIKE '%KR%' then DATE_ADD(a.writetime,INTERVAL 9 - cast(MID(a.timezone,2,2) AS unsigned) HOUR)" +
       " when MID(a.timezone,1,1) = '+' AND cast(MID(a.timezone,2,2) AS UNSIGNED) > 9 then DATE_SUB(a.writetime,INTERVAL 9 - cast(MID(a.timezone,2,2) AS UNSIGNED) HOUR)"+
       ' ELSE a.writetime END'+
-      ' AS changeTime'              
-=======
-      " when MID(a.timezone,1,1) = '+' and cast(MID(a.timezone,2,2) AS UNSIGNED) < 9 then DATE_ADD(a.writetime,INTERVAL 9 - cast(MID(a.timezone,2,2) AS unsigned) HOUR)" +
-      " when MID(a.timezone,1,1) = '+' AND cast(MID(a.timezone,2,2) AS UNSIGNED) > 9 then DATE_SUB(a.writetime,INTERVAL 9 - cast(MID(a.timezone,2,2) AS UNSIGNED) HOUR)"+
-      ' ELSE a.writetime END'+
       ' AS changeTime'            
->>>>>>> 7980c930b923926a324755ee1ae9d954445899b3
       try{
         const subQuery = await this.subQueryDataDay()
-        const result = await this.ecg_raw_history_lastRepository.createQueryBuilder('a')
-        .select(select)         
-        .leftJoin(subQuery,'b','a.eq = b.eq AND Mid(a.writetime,1,10) = b.writetime')
-        .orderBy('changeTime' ,'DESC')   
-        .getRawMany()  
+        let result
+        // if(eq.length != 0){
+        //  result = await this.ecg_raw_history_lastRepository.createQueryBuilder('a')
+        // .select(select)         
+        // .leftJoin(subQuery,'b','a.eq = b.eq AND Mid(a.writetime,1,10) = b.writetime')          
+        // .where({"eq":In(eq)})
+        // .orderBy('changeTime' ,'DESC')   
+        // .getRawMany()  
+        // }else{
+          result = await this.ecg_raw_history_lastRepository.createQueryBuilder('a')
+          .select(select)         
+          .leftJoin(subQuery,'b','a.eq = b.eq AND Mid(a.writetime,1,10) = b.writetime')          
+          .orderBy('changeTime' ,'DESC')   
+          .getRawMany()
+        // }
         
         const Value = (result.length != 0)? commonFun.converterJson(result) : commonFun.converterJson('result = ' + '0')       
         
@@ -70,19 +73,7 @@ export class ecg_raw_history_lastService {
       }      
     }
       
-<<<<<<< HEAD
-    async subQueryDataDay(): Promise<string>{
-      const subSelect = 'eq ,Mid(writetime,1,10) writetime,sum(step) step,sum(distanceKM) distanceKM,sum(cal) cal,sum(calexe) calexe,sum(arrcnt) arrcnt'
-      try{
-        
-        const result = await this.ecg_csv_datadayRepository.createQueryBuilder()
-        .subQuery()
-        .select(subSelect)
-        .from(ecg_csv_datadayEntity,'')                    
-        .groupBy('eq,Mid(writetime,1,10)')          
-        .getQuery()          
-=======
-     async subQueryDataDay(): Promise<string>{
+async subQueryDataDay(): Promise<string>{
         const subSelect = 'eq ,Mid(writetime,1,10) writetime,sum(step) step,sum(distanceKM) distanceKM,sum(cal) cal,sum(calexe) calexe,sum(arrcnt) arrcnt'
         try{
           
@@ -92,13 +83,12 @@ export class ecg_raw_history_lastService {
           .from(ecg_csv_datadayEntity,'')                    
           .groupBy('eq,Mid(writetime,1,10)')          
           .getQuery()          
->>>>>>> 7980c930b923926a324755ee1ae9d954445899b3
 
-        return result
+          return result
 
-      }catch(E){
-        console.log(E)
+        }catch(E){
+          console.log(E)
+        }
       }
-    }
 
 }
