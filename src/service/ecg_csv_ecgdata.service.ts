@@ -1,6 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+<<<<<<< HEAD
 import { Repository } from 'typeorm';
+=======
+import { MoreThanOrEqual, Repository, LessThan, LessThanOrEqual } from 'typeorm';
+>>>>>>> 7980c930b923926a324755ee1ae9d954445899b3
 import { ecg_csv_ecgdataEntity } from "src/entity/ecg_csv_ecgdata.entity";
 import { ecg_csv_ecgdataDTO } from "src/dto/ecg_csv_ecgdata.dto";
 import { commonFun } from 'src/clsfunc/commonfunc';
@@ -102,7 +106,11 @@ try{
     return Value;    
     } 
 
+<<<<<<< HEAD
     async getEcgTime(empid:string,startDate:string,endDate:string): Promise<string[]>{        
+=======
+  async getEcgTime(empid:string,startDate:string,endDate:string): Promise<string[]>{        
+>>>>>>> 7980c930b923926a324755ee1ae9d954445899b3
         try{
            const result = await this.ecg_csv_ecgdataRepository.createQueryBuilder('ecg_csv_ecgdata')
                                 .select('Mid(writetime,12,4) writetime')                                
@@ -135,6 +143,11 @@ try{
         }                 
       
      }
+<<<<<<< HEAD
 }
 
 
+=======
+
+}
+>>>>>>> 7980c930b923926a324755ee1ae9d954445899b3
