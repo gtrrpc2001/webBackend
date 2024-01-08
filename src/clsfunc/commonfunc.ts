@@ -83,5 +83,18 @@ import { parentsEntity } from 'src/entity/parents.entity';
             return 12      
         }
      }
+
+     static getEcgBuffer(ecg:number[]):Buffer{
+      const uint32Array = new Uint16Array(ecg);
+      const arrBuffer = uint32Array.buffer
+      return Buffer.from(arrBuffer)
+    }
+  
+    static getEcgNumber(ecg:Buffer):number[]{      
+      const uint8Arr = new Uint8Array(ecg)
+      const uint32Arr = new Uint16Array(uint8Arr.buffer);      
+      const newArr = [...uint32Arr]
+      return newArr
+    }
     
 }

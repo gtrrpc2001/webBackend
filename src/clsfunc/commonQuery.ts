@@ -28,17 +28,27 @@ export class commonQuery{
         return result;
     }
 
-    static async getProfile(Repository:any,parentsEntity:any,empid:string):Promise<string>{
+    static async getProfile(Repository:any,parentsEntity:any,empid:string,bool=false):Promise<string>{
         let boolResult = false
         try{
             let select = 'a.eq,a.eqname,a.email,a.phone as userphone,a.sex,a.height,a.weight,a.age,a.birth,a.signupdate,'+
             'a.sleeptime,a.uptime,a.bpm,a.step,a.distanceKM,a.cal,' +
             'a.calexe,a.alarm_sms,a.differtime,b.phone'
-            const result = await Repository.createQueryBuilder('a')        
-        .select(select)    
-        .leftJoin(parentsEntity,'b','a.eq = b.eq')    
-        .where({"eq":empid})    
-        .getRawOne()    
+            let result
+            if(bool){
+                result = await Repository.createQueryBuilder('a')        
+            .select(select)    
+            .leftJoin(parentsEntity,'b','a.eq = b.eq')    
+            .where({"eq":empid})    
+            .getRawOne()    
+
+            }else{
+                result = await Repository.createQueryBuilder('a')        
+                .select(select)    
+                .leftJoin(parentsEntity,'b','a.eq = b.eq')    
+                .where({"eq":empid})    
+                .getRawMany()
+            }
         console.log(result)
         const jsonValue = (result.length != 0 && empid != null)? result : 'result = ' + boolResult.toString()     
         return commonFun.converterJson(jsonValue);

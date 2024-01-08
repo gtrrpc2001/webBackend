@@ -1,11 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { MoreThanOrEqual, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { ecg_csv_ecgdataEntity } from "src/entity/ecg_csv_ecgdata.entity";
 import { ecg_csv_ecgdataDTO } from "src/dto/ecg_csv_ecgdata.dto";
 import { commonFun } from 'src/clsfunc/commonfunc';
 import { commonQuery } from 'src/clsfunc/commonQuery';
 import { ecg_raw_history_lastEntity } from 'src/entity/ecg_raw_history_last.entity';
+import { MoreThanOrEqual,LessThan,LessThanOrEqual } from 'typeorm';
 
 
 @Injectable()
@@ -84,8 +85,7 @@ try{
                             .where({"eq":empid})
                             .andWhere({"writetime":MoreThanOrEqual(startDate)})
                             .getRawMany()
-      const changeEcg:number[] = await commonFun.getEcgNumArr(result)
-      const test = {startDate,changeEcg}
+      const changeEcg:number[] = await commonFun.getEcgNumArr(result)      
       const Value = (result.length != 0 && empid != null)? changeEcg : [0]
       console.log(empid)                                                    
       return Value;    
@@ -102,4 +102,39 @@ try{
     return Value;    
     } 
 
+    async getEcgTime(empid:string,startDate:string,endDate:string): Promise<string[]>{        
+        try{
+           const result = await this.ecg_csv_ecgdataRepository.createQueryBuilder('ecg_csv_ecgdata')
+                                .select('Mid(writetime,12,4) writetime')                                
+                                .where({"eq":empid})
+                                .andWhere({"writetime":MoreThanOrEqual(startDate)})
+                                .andWhere({"writetime":LessThan(endDate)})
+                                .groupBy('Mid(writetime,12,4)')
+                                .getRawMany()                    
+          console.log(empid)                                                    
+          return result;    
+        } catch(E){
+            console.log(E)
+        }                 
+      
+     }
+
+     async getGraphEcgValue(empid:string,startDate:string,endDate:string): Promise<number[]>{        
+        try{
+           const result = await this.ecg_csv_ecgdataRepository.createQueryBuilder('ecg_csv_ecgdata')
+                                .select('ecgpacket')                                
+                                .where({"eq":empid})
+                                .andWhere({"writetime":MoreThanOrEqual(startDate)})
+                                .andWhere({"writetime":LessThanOrEqual(endDate)})                                
+                                .getRawMany()                                               
+          const changeEcg:number[] = await commonFun.getEcgNumArr(result)  
+        //   const Value = (result.length != 0 && empid != null)? changeEcg : [0]                                
+          return changeEcg;    
+        } catch(E){
+            console.log(E)
+        }                 
+      
+     }
 }
+
+

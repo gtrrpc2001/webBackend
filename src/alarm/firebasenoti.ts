@@ -36,36 +36,41 @@ static async setAndroid_Ios(tokens:string[],body:ecg_csv_ecgdataDTO,phone:any): 
     admin.app().delete()
     this.check++
     if(this.check == 2) return 
-    return await this.setAndroid_Ios(tokens,body,phone)
+    try{
+      return await this.setAndroid_Ios(tokens,body,phone);
+    }catch(E){
+      console.log(E);
+    }
   }          
 }
 
-   static async setPushAlarm(tokens:string[],arrStatus:string,time:string,address:string,bodystate:number,timezone:string): Promise<boolean>{
-    try{      
-         
-      const interfaceTitle = alarmController.getTitle(arrStatus,bodystate,timezone)
-      const interfaceBody = alarmController.getBody(address,time)
-      const nationalCheck = !timezone?.includes('US')
-      let title = nationalCheck ? interfaceTitle.ko : interfaceTitle.en
-      let body = nationalCheck?  interfaceBody.ko : interfaceBody.en
-
-      console.log(interfaceTitle.en + '여기;')
-
-       await admin
-       .messaging()
-       .sendEachForMulticast({
-         notification: {title,body},
-         tokens: tokens,
-         android: {priority:'high'},
-       })
-       .catch((error: any) => {
-         console.error(error)
-         return false;
-       })
-       return true;
-     }catch(E){
-       console.log(E)
-       return false;
-     } 
-    }
+static async setPushAlarm(tokens:string[],arrStatus:string,time:string,address:string,bodystate:number,timezone:string): Promise<boolean>{
+  try{                      
+   let title = alarmController.getTitle(arrStatus,bodystate,timezone)
+   let body = alarmController.getBody(address,time,timezone)    
+   console.log('성공 ' + title)
+    await admin
+    .messaging()
+    .sendEachForMulticast({
+      notification: {title,body},
+      tokens: tokens,
+      android: {priority:'high'},
+      apns:{
+        payload:{
+          aps:{
+            sound: bodystate == 1 ? 'heartAttackSound.wav' :'basicsound.wav'
+          }                
+        }
+      }
+    })
+    .catch((error: any) => {
+      console.error(error)
+      return false;
+    })
+    return true;
+  }catch(E){
+    console.log(E)
+    return false;
+  }    
+}
 }

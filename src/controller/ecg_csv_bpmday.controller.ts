@@ -31,6 +31,14 @@ export class ecg_csv_bpmdayController {
     return this.ecg_csv_bpmdayService.getWebBpm(eq,startDate,endDate);
   }
 
+  @Get("/webGraphBpmHrvArr")
+ async getGraph(       
+   @Query('eq') eq:string,
+   @Query('startDate') startDate:string,
+   @Query('endDate') endDate:string): Promise<any> {       
+    return await this.ecg_csv_bpmdayService.webGraphBpmHrvArr(eq,startDate,endDate);
+  }
+
   @Get("/test")
  async getTest(       
    @Query('eq') eq:string): Promise<string> {       

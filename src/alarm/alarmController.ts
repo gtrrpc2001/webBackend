@@ -2,20 +2,28 @@ import { wordNational } from 'src/interface/wordNational';
 import { isDefined } from 'class-validator';
 
 export class alarmController{
-    static getBody(address:string,time:string):wordNational{
-        const koBody = `${isDefined(address) ? '발생주소:' + address : ""} 시간: ${this.getTime(time)}`
-        const enBody = `${isDefined(address) ? 'User Location:' + address : ""} time: ${this.getTime(time)}`
-       let bodyNational:wordNational = {ko:koBody,en:enBody,ja:null,ch:null}        
-       return bodyNational
-      }
+  static getBody(address:string,time:string,timezone:string):string{
+    switch(true){
+      case timezone?.includes('US'):
+        return `${isDefined(address) ? 'User Location:' + address : ""} time: ${this.getTime(time)}`
+      case timezone?.includes('MO'):
+        return `${isDefined(address) ? '使用者位置:' + address : ""} 时间: ${this.getTime(time)}`
+      default :          
+        return `${isDefined(address) ? '발생주소:' + address : ""} 시간: ${this.getTime(time)}`
+    }
+  }
   
   
-      static getTitle(arrStatus:string,bodystate:number,timezone:string):wordNational{                
-        let kTitle = `${bodystate == 1 ? "긴급!! 심장마비" : this.getStatus(arrStatus)} 발생!`
-        let eTitle = `${bodystate == 1 ? "emergency!! Heart attack issue" : ` ${this.getENGStatus(arrStatus)}`} detected!`
-        let translate:wordNational = {en:eTitle,ko:kTitle,ja:null,ch:null}
-        console.log(eTitle + '여기 1')
-        return translate
+      static getTitle(arrStatus:string,bodystate:number,timezone:string):string{
+
+        switch(true){
+          case timezone?.includes('US'):
+            return `${bodystate == 1 ? "emergency!! Heart attack issue" : ` ${this.getENGStatus(arrStatus)}`} detected!`
+          case timezone?.includes('MO'):
+            return `${bodystate == 1 ? "紧急状况!!" : ` ${this.getChStatus(arrStatus)}`}`
+          default :
+            return `${bodystate == 1 ? "긴급!! 심장마비" : this.getStatus(arrStatus)} 발생!`
+        }                                                 
       }
   
       static getStatus(arrStatus:string): string{
@@ -41,6 +49,19 @@ export class alarmController{
             return "Slow heart rhythm"  
         case "fast":
             return "Fast heart rhythm"    
+        }
+      }
+
+      static getChStatus(arrStatus:string):string{
+        switch(arrStatus){          
+          case "irregular":
+           return  "检测到心律不齐!"  
+        case "arr" :
+          return "检测到心律不规则!"
+        case "slow":
+            return " 检测到心率偏低!"  
+        case "fast":
+            return "检测到心率偏高!"    
         }
       }
 

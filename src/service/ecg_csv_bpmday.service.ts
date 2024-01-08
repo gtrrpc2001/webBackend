@@ -36,7 +36,6 @@ export class ecg_csv_bpmdayService {
     console.log(`InsertBpmData --- ${body.writetime}`)
     try{
         const result = await this.setInsert(body)
-
         if(result){
          boolResult = await this.updateLast(body)
         }
@@ -51,10 +50,11 @@ export class ecg_csv_bpmdayService {
 
   async updateLast(body:ecg_csv_ecgdataDTO): Promise<boolean>{    
     try{   
-      console.log(`${body.cal}--${body.calexe}--${body.step}--${body.distanceKM}--${body.arrcnt}--${body.temp}`)     
+      console.log(`${body.timezone}`)     
+        const timezone = body.timezone.includes('+') ? body.timezone : (body.timezone.includes('-') ? body.timezone : ('+' + body.timezone).trim())
         const result = await this.ecg_raw_history_lastRepository.createQueryBuilder()
         .update(ecg_raw_history_lastEntity)        
-        .set({"writetime":body.writetime ,"hrv":body.hrv,"cal":body.cal,"calexe":body.calexe,"step":body.step,
+        .set({"writetime":body.writetime ,"timezone":timezone ,"hrv":body.hrv,"cal":body.cal,"calexe":body.calexe,"step":body.step,
           "distanceKM":body.distanceKM,"arrcnt":body.arrcnt,"temp":body.temp,"eventcode":body.eventcode,
           "isack":body.isack,"log":body.log
           })
@@ -127,14 +127,14 @@ export class ecg_csv_bpmdayService {
     }
 
     async subQueryArr(eq:string,writetime:string,endDate:string): Promise<string>{
-      const subSelect = 'COUNT(ecgpacket) COUNT,writetime'
+      const subSelect = 'COUNT(ecgpacket) count,writetime'
       try{
         const result = await this.ecg_csv_ecgdata_arrRepository.createQueryBuilder()
         .subQuery()
         .select(subSelect)
         .from(ecg_csv_ecgdata_arrEntity,'')
         .where(`eq = '${eq}'`)
-        .andWhere(`writetime >= '${writetime}'`)
+        .andWhere(`writetime >= '${writetime}'`)          
         .andWhere(`writetime < '${endDate}'`)
         .groupBy('writetime')
         .having('COUNT(ecgpacket)')          
