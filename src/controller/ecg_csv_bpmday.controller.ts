@@ -12,7 +12,7 @@ export class ecg_csv_bpmdayController {
   @Post("/api_data")
  async postAll(    
    @Body() body: ecg_csv_ecgdataDTO): Promise<any> {            
-    return this.ecg_csv_bpmdayService.gubunKind(body);
+    return await this.ecg_csv_bpmdayService.gubunKind(body);
   }
 
   @Get("/api_getdata")
@@ -20,7 +20,7 @@ export class ecg_csv_bpmdayController {
    @Query('eq') eq:string,
    @Query('startDate') startDate:string,
    @Query('endDate') endDate:string): Promise<string> {        
-    return this.ecg_csv_bpmdayService.BpmData(eq,startDate,endDate);
+    return await this.ecg_csv_bpmdayService.BpmData(eq,startDate,endDate);
   }
 
   @Get("/webBpm")
@@ -28,7 +28,7 @@ export class ecg_csv_bpmdayController {
    @Query('eq') eq:string,
    @Query('startDate') startDate:string,
    @Query('endDate') endDate:string): Promise<string> {       
-    return this.ecg_csv_bpmdayService.getWebBpm(eq,startDate,endDate);
+    return await this.ecg_csv_bpmdayService.getWebBpm(eq,startDate,endDate);
   }
 
   @Get("/webGraphBpmHrvArr")
@@ -42,7 +42,7 @@ export class ecg_csv_bpmdayController {
   @Get("/test")
  async getTest(       
    @Query('eq') eq:string): Promise<string> {       
-    return this.ecg_csv_bpmdayService.BpmData(eq,"2023-08-30","2023-08-31");
+    return await this.ecg_csv_bpmdayService.BpmData(eq,"2023-08-30","2023-08-31");
   }
 
 }

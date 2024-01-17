@@ -85,8 +85,8 @@ import { parentsEntity } from 'src/entity/parents.entity';
      }
 
      static getEcgBuffer(ecg:number[]):Buffer{
-      const uint32Array = new Uint16Array(ecg);
-      const arrBuffer = uint32Array.buffer
+      const uint16Array = new Uint16Array(ecg);
+      const arrBuffer = uint16Array.buffer
       return Buffer.from(arrBuffer)
     }
   

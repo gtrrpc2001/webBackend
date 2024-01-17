@@ -9,6 +9,8 @@ import { parentsModule } from "src/module/parents.module";
 import { ConfigModule, ConfigService } from "@nestjs/config";
 import { MySqlMslConfigService } from "src/service/mysqlconfig.service";
 import { userModule } from "src/module/user.module";
+import { ecg_byteModule } from "src/module/ecg_byte.module";
+import { appversionModule } from "src/module/appversion.module";
 
 
 
@@ -27,7 +29,7 @@ export class allModule{
             
         ecg_csv_ecgdata_arrModule,ecg_csv_bpmdayModule,ecg_csv_datadayModule,
         ecg_csv_ecgdataModule,ecg_raw_history_lastModule,userModule,admin_login_logModule,
-        parentsModule
+        parentsModule,ecg_byteModule,appversionModule
         
     ]
 }

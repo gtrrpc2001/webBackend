@@ -11,7 +11,7 @@ export class parentsController {
   @Post("/api_getdata")
  async postAll(    
    @Body() body: parentsDTO): Promise<string> {     
-    return this.parentsService.postParent(body);
+    return await this.parentsService.postParent(body);
   }
   @Get("/getTest")
  async getAll(@Query('eq') eq: string[]): Promise<boolean> {            

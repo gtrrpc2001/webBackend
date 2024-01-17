@@ -12,7 +12,7 @@ export class ecg_csv_datadayController {
   @Post("/api_getdata")
  async postAll(    
    @Body() body: ecg_csv_ecgdataDTO): Promise<any> {         
-    return this.ecg_csv_datadayService.gubunKind(body);
+    return await this.ecg_csv_datadayService.gubunKind(body);
   }
 
   @Get("/day")
@@ -20,7 +20,7 @@ export class ecg_csv_datadayController {
    @Query('eq') eq:string,
    @Query('startDate') startDate:string,
    @Query('endDate') endDate:string): Promise<string> {       
-    return this.ecg_csv_datadayService.getDay('calandDistanceData',eq,startDate,endDate);
+    return await this.ecg_csv_datadayService.getDay('calandDistanceData',eq,startDate,endDate);
   }
 
   @Get("/webDay")
@@ -35,7 +35,7 @@ export class ecg_csv_datadayController {
   @Get("/test")
  async getTest(       
    @Query('eq') eq:string): Promise<any> {       
-    return this.ecg_csv_datadayService.monthlyCalAndDistanceData(eq,"2023-08-29","2023-08-31");
+    return await this.ecg_csv_datadayService.monthlyCalAndDistanceData(eq,"2023-08-29","2023-08-31");
   }
 
 }

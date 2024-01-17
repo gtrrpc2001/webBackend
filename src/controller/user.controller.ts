@@ -11,14 +11,14 @@ export class userController {
   @Post("/api_getdata")
  async postAll(    
    @Body() body: userDTO): Promise<any> {        
-    return this.userService.gubunKind(body);
+    return await this.userService.gubunKind(body);
   }
   checkIDDupe
 
   @Get("/CheckIDDupe")
  async getCheckIDDupe(       
    @Query('empid') empid:string): Promise<string> {       
-    return this.userService.checkIDDupe(empid);
+    return await this.userService.checkIDDupe(empid);
   }
 
   @Get("/findID")
@@ -26,14 +26,14 @@ export class userController {
    @Query('eqname') name:string,
    @Query('phone') phone:string,
    @Query('birth') birth:string): Promise<string> {       
-    return this.userService.findID(name,phone,birth);
+    return await this.userService.findID(name,phone,birth);
   }
 
   @Get("/Profile")
  async getProfile(       
    @Query('empid') empid:string): Promise<string> {   
     console.log(empid)   
-    return this.userService.getProfile(empid);
+    return await this.userService.getProfile(empid);
   }
 
   @Get("/CheckLogin")
@@ -42,6 +42,6 @@ export class userController {
    @Query('pw') pw:string,
    @Query('phone') phone:string,
    @Query('token') token:string): Promise<any> {    
-    return this.userService.checkLogin(empid,pw,phone,token);
+    return await this.userService.checkLogin(empid,pw,phone,token);
   }  
 }

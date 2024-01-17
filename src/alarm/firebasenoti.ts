@@ -15,7 +15,8 @@ export class firebasenoti{
       let android = require(path)
       let iosPath = staticConfigValue.getFirebase_sdk_ios(configService).path   
       let ios = require(iosPath)          
-      let phone = [admin.credential.cert(android),admin.credential.cert(ios)]                   
+      let phone = [admin.credential.cert(android,ios)]
+      // [admin.credential.cert(android),admin.credential.cert(ios)]                   
       for(var i = 0; i < phone.length; i++){
         await this.setAndroid_Ios(tokens,body,phone[i])
       }          
@@ -33,16 +34,21 @@ static async setAndroid_Ios(tokens:string[],body:ecg_csv_ecgdataDTO,phone:any): 
     this.check = 0
     return await this.setPushAlarm(tokens,body.arrStatus,body.writetime,body.address,body.bodystate,body.timezone) 
   } catch(E){        
-    admin.app().delete()
-    this.check++
-    if(this.check == 2) return 
+    console.log(E)
     try{
-      return await this.setAndroid_Ios(tokens,body,phone);
+      console.log(admin.app().name)
+      if (this.check == 0) admin.app().delete();
+      this.check++
+      if(this.check == 2) return false;
+      return await this.setAndroid_Ios(tokens,body,phone)
     }catch(E){
-      console.log(E);
-    }
+      console.log(E)
+      console.log('alarm 부분 error 확인바람')  
+      return false;    
+    }    
   }          
 }
+
 
 static async setPushAlarm(tokens:string[],arrStatus:string,time:string,address:string,bodystate:number,timezone:string): Promise<boolean>{
   try{                      
