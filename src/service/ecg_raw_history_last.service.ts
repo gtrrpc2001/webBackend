@@ -46,11 +46,8 @@ export class ecg_raw_history_lastService {
       " when MID(a.timezone,1,1) = '+' AND cast(MID(a.timezone,2,2) AS UNSIGNED) < 9 AND a.timezone NOT LIKE '%KR%' then DATE_ADD(a.writetime,INTERVAL 9 - cast(MID(a.timezone,2,2) AS unsigned) HOUR)" +
       " when MID(a.timezone,1,1) = '+' AND cast(MID(a.timezone,2,2) AS UNSIGNED) > 9 then DATE_SUB(a.writetime,INTERVAL 9 - cast(MID(a.timezone,2,2) AS UNSIGNED) HOUR)"+
       ' ELSE a.writetime END'+
-<<<<<<< HEAD
       ' AS changeTime'              
-=======
-      ' AS changeTime'            
->>>>>>> e1c95a9efd594a33cc2ea5ff0605362d52e0640a
+
       try{
         const subQuery = await this.subQueryDataDay()
         let result
@@ -75,20 +72,8 @@ export class ecg_raw_history_lastService {
       }catch(E){
         console.log(E)
       }      
-    }
-      
-<<<<<<< HEAD
-    async subQueryDataDay(): Promise<string>{
-      const subSelect = 'eq ,Mid(writetime,1,10) writetime,sum(step) step,sum(distanceKM) distanceKM,sum(cal) cal,sum(calexe) calexe,sum(arrcnt) arrcnt'
-      try{
-        
-        const result = await this.ecg_csv_datadayRepository.createQueryBuilder()
-        .subQuery()
-        .select(subSelect)
-        .from(ecg_csv_datadayEntity,'')                    
-        .groupBy('eq,Mid(writetime,1,10)')          
-        .getQuery()          
-=======
+    }      
+
 async subQueryDataDay(): Promise<string>{
         const subSelect = 'eq ,Mid(writetime,1,10) writetime,sum(step) step,sum(distanceKM) distanceKM,sum(cal) cal,sum(calexe) calexe,sum(arrcnt) arrcnt'
         try{
@@ -99,10 +84,8 @@ async subQueryDataDay(): Promise<string>{
           .from(ecg_csv_datadayEntity,'')                    
           .groupBy('eq,Mid(writetime,1,10)')          
           .getQuery()          
->>>>>>> e1c95a9efd594a33cc2ea5ff0605362d52e0640a
 
           return result
-
         }catch(E){
           console.log(E)
         }

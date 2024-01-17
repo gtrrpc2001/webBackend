@@ -101,13 +101,8 @@ try{
     const Value = (result.length != 0 && empid != null)? commonFun.convertCsv(commonFun.converterJson(result)) : commonFun.converterJson('result = ' + '0')
     return Value;    
     } 
-
-<<<<<<< HEAD
-    async getEcgTime(empid:string,startDate:string,endDate:string): Promise<string[]>{        
-=======
-  async getEcgTime(empid:string,startDate:string,endDate:string): Promise<string[]>{        
-
->>>>>>> e1c95a9efd594a33cc2ea5ff0605362d52e0640a
+  
+  async getEcgTime(empid:string,startDate:string,endDate:string): Promise<string[]>{ 
         try{
            const result = await this.ecg_csv_ecgdataRepository.createQueryBuilder('ecg_csv_ecgdata')
                                 .select('Mid(writetime,12,4) writetime')                                
@@ -141,8 +136,3 @@ try{
       
      }
 }
-<<<<<<< HEAD
-
-
-=======
->>>>>>> e1c95a9efd594a33cc2ea5ff0605362d52e0640a
