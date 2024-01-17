@@ -214,7 +214,8 @@ export class ecg_csv_ecgdata_arrService {
                       .andWhere({"writetime":MoreThan(startDate)})
                       .andWhere({"writetime":LessThan(endDate)})
                       .groupBy(`MID(writetime,${startLen},2)`)
-                      .having('COUNT(ecgpacket)')                      
+                      .having('COUNT(ecgpacket)')
+                      .orderBy('writetime','ASC')                      
                       .getRawMany()
       const Value = (result.length != 0 && empid != null)? commonFun.converterJson(result) : commonFun.converterJson('result = ' + '0')                   
       return Value
