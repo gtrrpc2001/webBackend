@@ -12,6 +12,7 @@ import { isDefined } from 'class-validator';
 import { ConfigService } from '@nestjs/config';
 import { userEntity } from 'src/entity/user.entity';
 import { ecg_csv_ecgdataEntity } from 'src/entity/ecg_csv_ecgdata.entity';
+import { iosNoti } from 'src/alarm/iosNoti';
 
 @Injectable()
 export class ecg_csv_ecgdata_arrService {
@@ -45,7 +46,7 @@ export class ecg_csv_ecgdata_arrService {
     try{    
         const arrInsert = await this.setInsert(body)  
         if(arrInsert){
-          const parentsArr = await this.getSelToken(body)           
+          const parentsArr = await this.getSelToken(body)                     
           boolResult = await this.callPushAlarm(parentsArr,body)
           //console.log(`boolean 값 안받아짐 -- ${boolResult}`)
         }        
@@ -56,15 +57,14 @@ export class ecg_csv_ecgdata_arrService {
         return E;
     }  
     
-  }
+  }  
 
   async callPushAlarm(parentsArr:parentsEntity[],body:ecg_csv_ecgdataDTO):Promise<boolean>{
     try{
       if(parentsArr.length != 0){
-        let tokens : string[] = commonFun.getTokens(parentsArr)
-        let i = 0;        
-        if(tokens.length != 0)
-          return await firebasenoti.PushNoti(tokens,body,this.configService)
+        let tokens : string[] = commonFun.getTokens(parentsArr)                
+        if(tokens.length != 0)        
+          return await firebasenoti.PushNoti(tokens,body,this.configService)          
         else
           return false;
        }

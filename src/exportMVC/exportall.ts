@@ -11,6 +11,8 @@ import { MySqlMslConfigService } from "src/service/mysqlconfig.service";
 import { userModule } from "src/module/user.module";
 import { ecg_byteModule } from "src/module/ecg_byte.module";
 import { appversionModule } from "src/module/appversion.module";
+import { smsModule } from "src/module/sms.module";
+import { app_logModule } from "src/module/app_log.module";
 
 
 
@@ -29,7 +31,8 @@ export class allModule{
             
         ecg_csv_ecgdata_arrModule,ecg_csv_bpmdayModule,ecg_csv_datadayModule,
         ecg_csv_ecgdataModule,ecg_raw_history_lastModule,userModule,admin_login_logModule,
-        parentsModule,ecg_byteModule,appversionModule
+        parentsModule,ecg_byteModule,appversionModule,smsModule,app_logModule
+        
         
     ]
 }

@@ -41,7 +41,9 @@ export class userController {
    @Query('empid') empid:string,
    @Query('pw') pw:string,
    @Query('phone') phone:string,
-   @Query('token') token:string): Promise<any> {    
-    return await this.userService.checkLogin(empid,pw,phone,token);
+   @Query('token') token:string,
+   @Query('destroy') destroy:boolean
+   ): Promise<any> {    
+    return await this.userService.checkLogin(empid,pw,phone,token,destroy);
   }  
 }

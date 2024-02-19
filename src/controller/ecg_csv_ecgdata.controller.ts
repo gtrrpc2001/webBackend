@@ -27,8 +27,8 @@ export class ecg_csv_ecgdataController {
    ): Promise<number[]> {       
     return await this.ecg_csv_ecgdataService.getEcg(eq,startDate);
   }
-  
-@Get("/EcgTime")
+
+  @Get("/EcgTime")
   async getEcgTime(
   @Query('eq') eq:string,
   @Query('startDate') startDate:string,
@@ -45,4 +45,5 @@ export class ecg_csv_ecgdataController {
    ): Promise<number[]> {       
     return await this.ecg_csv_ecgdataService.getGraphEcgValue(eq,startDate,endDate);
   }
+
 }

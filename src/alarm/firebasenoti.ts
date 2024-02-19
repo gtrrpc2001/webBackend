@@ -3,58 +3,56 @@ import * as admin from 'firebase-admin';
 import { ecg_csv_ecgdataDTO } from 'src/dto/ecg_csv_ecgdata.dto';
 import { staticConfigValue } from 'src/config/staticConfigValue';
 import { ConfigService } from '@nestjs/config';
-import { wordNational } from 'src/interface/wordNational';
 import { alarmController } from './alarmController';
+import { iosNoti } from './iosNoti';
+import { androidNoti } from './androidNoti';
 
 export class firebasenoti{
 
-  static check = 0
-  static async PushNoti(tokens:string[],body:ecg_csv_ecgdataDTO,configService:ConfigService): Promise<boolean>{
-    try{
-      let path = staticConfigValue.getFirebase_sdk(configService).path                    
-      let android = require(path)
-      let iosPath = staticConfigValue.getFirebase_sdk_ios(configService).path   
-      let ios = require(iosPath)          
-      let phone = [admin.credential.cert(android,ios)]
-      // [admin.credential.cert(android),admin.credential.cert(ios)]                   
-      for(var i = 0; i < phone.length; i++){
-        await this.setAndroid_Ios(tokens,body,phone[i])
-      }          
-      return true    
-      }catch{           
-         return false
-      }
-}
-
-static async setAndroid_Ios(tokens:string[],body:ecg_csv_ecgdataDTO,phone:any): Promise<boolean>{
-  try{
+  static initializeApp = (kind:any) => {          
     admin.initializeApp({        
-      credential: admin.credential.cert(phone) ,                
+      credential: admin.credential.cert(kind),                
     });
-    this.check = 0
-    return await this.setPushAlarm(tokens,body.arrStatus,body.writetime,body.address,body.bodystate,body.timezone) 
-  } catch(E){        
-    console.log(E)
-    try{
-      console.log(admin.app().name)
-      if (this.check == 0) admin.app().delete();
-      this.check++
-      if(this.check == 2) return false;
-      return await this.setAndroid_Ios(tokens,body,phone)
-    }catch(E){
-      console.log(E)
-      console.log('alarm 부분 error 확인바람')  
-      return false;    
-    }    
-  }          
 }
 
+static async PushNoti(tokens:string[],body:ecg_csv_ecgdataDTO,configService:ConfigService): Promise<boolean>{
+    try{
+      const names = ["IOS","ANDROID"]
+      for(var name of names){        
+        const bool = await this.setKindBrand(name,configService)
+        if(bool) await this.setPushAlarm(tokens,body.arrStatus,body.writetime,body.address,body.bodystate,body.timezone) 
+      }
+      return true
+    } catch(E){        
+      console.log(E)
+      console.log('alarm error')                  
+      return false
+    }          
+}
+
+static setKindBrand = async(name:string,configService:ConfigService):Promise<boolean> => {
+  try{
+    switch(name){
+      case "ANDROID" :
+        await androidNoti.ANDROID(configService,admin)
+        break;
+      default :      
+        await iosNoti.IOS(configService,admin);        
+        break;
+    }
+
+    return true;
+  } catch(E){
+    console.log(E)
+    return false
+  } 
+}
 
 static async setPushAlarm(tokens:string[],arrStatus:string,time:string,address:string,bodystate:number,timezone:string): Promise<boolean>{
-  try{                      
+  try{                          
    let title = alarmController.getTitle(arrStatus,bodystate,timezone)
    let body = alarmController.getBody(address,time,timezone)    
-   console.log('성공 ' + title)
+   console.log('성공 ' + title)     
     await admin
     .messaging()
     .sendEachForMulticast({
