@@ -9,11 +9,11 @@ import { androidNoti } from './androidNoti';
 
 export class firebasenoti{
 
-  static initializeApp = (kind:any) => {          
-    firebase.initializeApp({        
-      credential: firebase.credential.cert(kind),                
-    });
-}
+//   static initializeApp = (kind:any) => {          
+//     firebase.initializeApp({        
+//       credential: firebase.credential.cert(kind),                
+//     });
+// }
 
 static async PushNoti(tokens:string[],body:ecg_csv_ecgdataDTO,configService:ConfigService): Promise<boolean>{
     try{
