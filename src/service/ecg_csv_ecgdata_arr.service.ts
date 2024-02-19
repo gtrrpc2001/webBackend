@@ -12,7 +12,7 @@ import { isDefined } from 'class-validator';
 import { ConfigService } from '@nestjs/config';
 import { userEntity } from 'src/entity/user.entity';
 import { ecg_csv_ecgdataEntity } from 'src/entity/ecg_csv_ecgdata.entity';
-import { iosNoti } from 'src/alarm/iosNoti';
+
 
 @Injectable()
 export class ecg_csv_ecgdata_arrService {
