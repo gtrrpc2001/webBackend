@@ -4,8 +4,8 @@ import { ecg_csv_ecgdataDTO } from 'src/dto/ecg_csv_ecgdata.dto';
 import { staticConfigValue } from 'src/config/staticConfigValue';
 import { ConfigService } from '@nestjs/config';
 import { alarmController } from './alarmController';
-import { iosNoti } from './iosNoti';
-import { androidNoti } from './androidNoti';
+// import { iosNoti } from './iosNoti';
+// import { androidNoti } from './androidNoti';
 
 export class firebasenoti{
 
