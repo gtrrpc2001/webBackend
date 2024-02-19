@@ -1,5 +1,5 @@
 import { isDefined } from 'class-validator';
-import * as admin from 'firebase-admin';
+import * as firebase from 'firebase-admin';
 import { ecg_csv_ecgdataDTO } from 'src/dto/ecg_csv_ecgdata.dto';
 import { staticConfigValue } from 'src/config/staticConfigValue';
 import { ConfigService } from '@nestjs/config';
@@ -10,8 +10,8 @@ import { androidNoti } from './androidNoti';
 export class firebasenoti{
 
   static initializeApp = (kind:any) => {          
-    admin.initializeApp({        
-      credential: admin.credential.cert(kind),                
+    firebase.initializeApp({        
+      credential: firebase.credential.cert(kind),                
     });
 }
 
@@ -34,10 +34,10 @@ static setKindBrand = async(name:string,configService:ConfigService):Promise<boo
   try{
     switch(name){
       case "ANDROID" :
-        await androidNoti.ANDROID(configService,admin)
+        await androidNoti.ANDROID(configService,firebase)
         break;
       default :      
-        await iosNoti.IOS(configService,admin);        
+        await iosNoti.IOS(configService,firebase);        
         break;
     }
 
@@ -53,7 +53,7 @@ static async setPushAlarm(tokens:string[],arrStatus:string,time:string,address:s
    let title = alarmController.getTitle(arrStatus,bodystate,timezone)
    let body = alarmController.getBody(address,time,timezone)    
    console.log('성공 ' + title)     
-    await admin
+    await firebase
     .messaging()
     .sendEachForMulticast({
       notification: {title,body},
