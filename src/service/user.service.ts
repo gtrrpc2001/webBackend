@@ -9,6 +9,7 @@ import { parentsEntity } from 'src/entity/parents.entity';
 import { isDefined } from 'class-validator';
 import { commonQuery } from 'src/clsfunc/commonQuery';
 import { pwBcrypt } from 'src/clsfunc/pwAES';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class userService {
@@ -18,6 +19,7 @@ export class userService {
   @InjectRepository(ecg_raw_history_lastEntity) private ecg_raw_history_lastRepository:Repository<ecg_raw_history_lastEntity>,
   @InjectRepository(parentsEntity) private parentsRepository:Repository<parentsEntity>,
   @InjectRepository(DeleteUserLogEntity) private DeleteUserLogRepository:Repository<DeleteUserLogEntity>,
+    private configService:ConfigService
   ){}
   
 
@@ -333,6 +335,22 @@ export class userService {
             console.log(E)
             return E;
         }             
+    }
+
+  webManagerCheck = async(eq:string):Promise<boolean> => {
+        try{
+            const result = await this.userRepository.createQueryBuilder()
+                            .select('eqname')
+                            .where({"eq":eq})
+                            .getRawOne()
+            if (result.eqname == this.configService.get<string>('MANAGER'))
+                return true;
+            else
+                return false;
+        }catch(E){
+            console.log(E)
+            return false;
+        }
     }
     
 }
