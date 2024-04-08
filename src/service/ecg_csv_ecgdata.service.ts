@@ -119,16 +119,32 @@ try{
       
      }
 
-     async getGraphEcgValue(empid:string,startDate:string,endDate:string): Promise<number[]>{        
+     async getGraphEcgChangeValue(result: ecg_csv_ecgdataEntity[]):Promise<{ecg: number[];writetime: string;}[]>{
+      let ecgArr = result.map(d => {
+         const {ecgpacket} = d
+         const after = ecgpacket?.replaceAll(';','')
+         const changeEcg:number[] =[]                                
+          after?.split('][').forEach((data:string) => {
+                  const sliceEcg = data?.replaceAll('[','')?.replaceAll(']','')?.split(',')
+                  sliceEcg.forEach(e => {                            
+                  changeEcg.push(Number(e))
+                  
+              })
+          })         
+         return {ecg:changeEcg,writetime:d.writetime} 
+     });
+      return ecgArr;
+    }
+
+     async getGraphEcgValue(empid:string,startDate:string,endDate:string): Promise<any>{        
         try{
            const result = await this.ecg_csv_ecgdataRepository.createQueryBuilder('ecg_csv_ecgdata')
-                                .select('ecgpacket')                                
+                                .select('ecgpacket,Mid(writetime,15,19) as writetime')                                
                                 .where({"eq":empid})
                                 .andWhere({"writetime":MoreThanOrEqual(startDate)})
                                 .andWhere({"writetime":LessThanOrEqual(endDate)})                                
                                 .getRawMany()                                               
-          const changeEcg:number[] = await commonFun.getEcgNumArr(result)  
-        //   const Value = (result.length != 0 && empid != null)? changeEcg : [0]                                
+          const changeEcg = await this.getGraphEcgChangeValue(result)                             
           return changeEcg;    
         } catch(E){
             console.log(E)
