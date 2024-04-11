@@ -5,17 +5,14 @@ import { smsController } from 'src/controller/sms.controller';
 import { smsEntity } from 'src/entity/sms.entity';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { userEntity } from 'src/entity/user.entity';
+import { CachConfigService } from 'src/service/cache.service';
  
 
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([smsEntity,userEntity]),    
-    CacheModule.register({ 
-    ttl: 5000, // 시간(밀리초)
-    max: 1000 , // 캐시에 담길 최대 데이터 개수
-    isGlobal: true, // 캐시모듈을 전역설정
-}),
+    CacheModule.registerAsync({isGlobal:true, useClass:CachConfigService,inject:[CachConfigService]})
   ],
   providers: [
     SmsService

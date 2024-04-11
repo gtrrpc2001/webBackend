@@ -8,7 +8,7 @@ import { CacheInterceptor,CACHE_MANAGER } from '@nestjs/cache-manager';
 import * as crypto from 'crypto';    
 import { Cache } from 'cache-manager';
 import { ConfigService } from '@nestjs/config';
-import axios, { AxiosRequestConfig } from 'axios'
+import axios from 'axios'
 import { userEntity } from 'src/entity/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import {Repository,Like} from 'typeorm';
@@ -49,16 +49,9 @@ export class SmsService{
         message.push(timeStamp)
         message.push(newLine)
         message.push(this.accessKey)
-        // hmac.update(method)
-        // hmac.update(space)
-        // hmac.update(url)
-        // hmac.update(timeStamp)
-        // hmac.update(newLine)
-        // hmac.update(this.accessKey)        
+
         //시그니처 생성        
-        const signature = hmac.update(message.join('')).digest('base64')      
-        // console.log(hmac)
-        //  const signature = hmac.digest('base64')      
+        const signature = hmac.update(message.join('')).digest('base64')       
 
         //string 으로 반환        
         return signature.toString();
@@ -81,8 +74,7 @@ export class SmsService{
     }
 
     smsCount = async (phoneNumber:string): Promise<number> => {
-        try{
-            // .andWhere(`smsEntity.writetime like '%${timeDay}%'`)
+        try{            
             const timeDay = dayjs(new Date()).format('YYYY-MM-DD')            
             const result = await this.smsRepository.createQueryBuilder()
                             .select('COUNT(*) AS count')
@@ -99,7 +91,7 @@ export class SmsService{
     }
 
     sendSms = async (phoneNumber:string,nationalCode:number):Promise<any> => {
-        // TODO : 1일 5회 문자인증 초과했는지 확인하는 로직 필요!
+        //1일 5회 문자인증 초과했는지 확인하는 로직
         const writetime = Date.now().toString()
 
         if (!await this.checkDayCount(phoneNumber)) return '인증번호 하루 횟수 초과 하셨습니다.';
@@ -138,19 +130,14 @@ export class SmsService{
 
         const signatureUrl = this.getUrl()
         const url = `https://sens.apigw.ntruss.com${signatureUrl}`        
-        try{
-            // const result = (await axios({
-            //     method:'POST',
-            //     url:url,
-            //     headers:headers,
-            //     data:body,                
-            // })).request
+        try{            
             const result = await axios.post(                
                 url,
                 body,                   
                 {headers},        
             ).then(async() => {
                 await this.insertSMS(phoneNumber)
+                await this.cacheManager.set(phoneNumber, checkNumber, 180000);
                 return true;
             }).catch(
                 (error) =>
@@ -158,11 +145,8 @@ export class SmsService{
                 console.log(HttpStatus.INTERNAL_SERVER_ERROR)
                 console.log(error)
                 return error
-                })
-            
-            // 캐시 추가하기
-            await this.cacheManager.set(phoneNumber, checkNumber, 180000);                       
-
+                })          
+                  
             return result
         }catch(E){
             console.log(E)
