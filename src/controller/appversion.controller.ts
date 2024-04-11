@@ -16,7 +16,9 @@ export class appversionController {
 
   @Get("/getVersion")
  async getTest(       
-   @Query('app') app:string): Promise<string> {       
-    return await this.appversionService.getVersion(app);
+   @Query('app') app:string,
+   @Query('gubun') gubun:string
+   ): Promise<string> {       
+    return await this.appversionService.getVersion(app,gubun);
   }
 }

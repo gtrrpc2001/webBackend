@@ -123,12 +123,14 @@ export class userEntity{
     @Column({type:'int'})
     alarm_sms:Int32;
 
-    @Column({type:'double'})
-    differtime:Double;
+    @Column({type:'int'})
+    differtime:Int32;
 
     @Column({type:'varchar'})
     protecteq:string; 
 
+    @Column({type:'int'})
+    appKey:Int32;
 }
 
 @Entity('delete_user_log')

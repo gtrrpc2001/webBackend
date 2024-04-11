@@ -29,8 +29,7 @@ export class ecg_byteService {
 
   async insertEcgPacket(body:ecg_byteDTO): Promise<string>{
     var boolResult = false
-    try{          
-      // console.log(body.ecgPacket)
+    try{                
         const result = await this.setInsert(body)
         
         if(result){            
@@ -39,8 +38,7 @@ export class ecg_byteService {
         console.log('ecgByteinsert')
         var jsonValue = 'result = ' + boolResult.toString()        
         return commonFun.converterJson(jsonValue);
-    }catch(E){
-        //console.log(E) 
+    }catch(E){        
         return E;
     } 
   }  
@@ -62,8 +60,7 @@ export class ecg_byteService {
 
   async setInsert(body:ecg_byteDTO): Promise<boolean>{
     try{
-         const buffer = commonFun.getEcgBuffer(body.ecgPacket);         
-        // ecgpacket:() => `HEX(AES_ENCRYPT('${body.ecgPacket}','${key}'))`
+         const buffer = commonFun.getEcgBuffer(body.ecgPacket);                 
         const result = await this.ecg_byteRepository.createQueryBuilder()
         .insert()
         .into(ecg_byteEntity)
@@ -77,24 +74,9 @@ export class ecg_byteService {
         console.log(E)
         return false
     }
-  }
+  }   
 
-    async getTest(empid:string,startDate:string,endDate:string): Promise<string>{        
-        try{            
-           const result = await this.ecg_byteRepository.createQueryBuilder()
-                                .select('writetime,ecgpacket')                                
-                                .where({"eq":empid})
-                                .andWhere({"writetime":MoreThanOrEqual(startDate)})
-                                .andWhere({"writetime":LessThanOrEqual(endDate)})                                
-                                .getRawMany()
-            const value = await this.getChangeValue(result)                          
-          return commonFun.converterJson(value);    
-        } catch(E){
-            console.log(E)
-        }         
-    }
-
-    async getChangeValue(result: any[]){
+  async getChangeValue(result: any[]){
      return result.map(d => {
         const {writetime,ecgpacket} = d                                     
         const ecg = commonFun.getEcgNumber(ecgpacket)
@@ -114,9 +96,42 @@ export class ecg_byteService {
     return ecgArr;
  }  
 
+ async EcgToByte (idx:number,limit:number): Promise<number>{        
+  let index = 0;
+  try{      
+      const result:ecg_csv_ecgdataEntity[] = await this.ecg_csv_ecgdataRepository.createQueryBuilder('ecg_csv_ecgdata')
+                            .select('*')                                
+                            .where({"idx":MoreThan(index == 0 ? idx : index)})
+                            .orderBy("idx","ASC")
+                            .limit(limit)                            
+                            .getRawMany()
+      if(result.length != 0){        
+        for(var i = 0; i < result.length; i++){
+          const dR = result[i]
+          index = dR.idx
+          const eq = dR.eq
+          const writetime = dR.writetime
+          const timezone = dR.timezone
+          const bpm = Number(dR.bpm)
+          const ecg = dR.ecgpacket
+          const changeEcg:number[] = await commonFun.getFromStringToNumberArrEcg(ecg)          
+          const b:ecg_byteDTO = {"kind":"ecgByteInsert","eq":eq,"writetime":writetime,"timezone":timezone,"bpm":bpm,"ecgPacket":changeEcg}
+          await this.setInsert(b)            
+        }
+
+      }
+    console.log(index)
+    return index;    
+  } catch(E){
+      console.log(E)
+    return index;
+  }                
+
+}
+
  async getEcg (empid:string,startDate:string): Promise<number[]>{        
   try{
-     const result = await this.ecg_csv_ecgdataRepository.createQueryBuilder('ecg_csv_ecgdata')
+     const result = await this.ecg_byteRepository.createQueryBuilder('ecg_byte')
                           .select('ecgpacket')                                
                           .where({"eq":empid})
                           .andWhere({"writetime":MoreThanOrEqual(startDate)})
@@ -133,7 +148,7 @@ export class ecg_byteService {
 
  async getEcgTime(empid:string,startDate:string,endDate:string): Promise<string[]>{        
   try{
-     const result = await this.ecg_byteRepository.createQueryBuilder('ecg_csv_ecgdata')
+     const result = await this.ecg_byteRepository.createQueryBuilder('ecg_byte')
                           .select('Mid(writetime,12,4) writetime')                                
                           .where({"eq":empid})
                           .andWhere({"writetime":MoreThanOrEqual(startDate)})
@@ -150,7 +165,7 @@ export class ecg_byteService {
 
 async getGraphEcgValue(empid:string,startDate:string,endDate:string): Promise<number[]>{        
   try{
-     const result = await this.ecg_byteRepository.createQueryBuilder('ecg_csv_ecgdata')
+     const result = await this.ecg_byteRepository.createQueryBuilder('ecg_byte')
                           .select('ecgpacket')                                
                           .where({"eq":empid})
                           .andWhere({"writetime":MoreThanOrEqual(startDate)})

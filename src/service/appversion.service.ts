@@ -10,11 +10,13 @@ export class appversionService {
   constructor(@InjectRepository(appversionEntity) private appversionRepository:Repository<appversionEntity>
   ){}
   
-  async getVersion(app:string): Promise<string>{
-    try{              
+  async getVersion(app:string,gubun:string): Promise<string>{
+    try{
+      const select = (gubun == "ios") ? 'versioncode' : 'versioncode,apkkey'
       const result = await this.appversionRepository.createQueryBuilder()
-                      .select('versioncode')                      
-                      .where({"app":app})                                                                 
+                      .select(select)                      
+                      .where({"app":app})
+                      .andWhere({"gubun":gubun})
                       .getRawOne()        
       return commonFun.converterJson(result);                    
     }catch(E){
@@ -24,10 +26,17 @@ export class appversionService {
 
   async updateVersion(body:appversionDTO): Promise<boolean>{    
     try{   
-        const result = await this.appversionRepository.createQueryBuilder()
+      let set
+      if(body.gubun == "ios"){
+        set = {"versioncode":body.versioncode}
+      }else{
+        set = {"versioncode":body.versioncode,"apkkey":body.apkkey}
+      }
+      const result = await this.appversionRepository.createQueryBuilder()
         .update(appversionEntity)        
-        .set({"versioncode":body.versioncode})
+        .set(set)
         .where({"app":body.app})
+        .andWhere({"gubun":body.gubun})  
         .execute()            
         return true;
     }catch(E){

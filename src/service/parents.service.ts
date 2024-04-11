@@ -95,13 +95,6 @@ export class parentsService {
       console.log(E)
       return false;
     }    
-  }
-
-  async getTime(eq:string): Promise<any>{ 
-    const e = ''
-    return e;
-    
-  }
-     
+  }  
 }
 

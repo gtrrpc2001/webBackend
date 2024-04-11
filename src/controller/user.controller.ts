@@ -45,9 +45,21 @@ export class userController {
    @Query('destroy') destroy:boolean
    ): Promise<any> {    
     return await this.userService.checkLogin(empid,pw,phone,token,destroy);
+  }  
+
+  @Get("/checkPhone")
+ async checkPhone(       
+   @Query('phone') phone:string): Promise<string> {     
+    return await this.userService.checkPhone(phone);
   }
 
-  @Get("/managerCheck")
+  @Get("/appKey")
+  async getAppKey(       
+    @Query('empid') empid:string): Promise<string> {
+      return await this.userService.getAppKey(empid);     
+   }
+
+   @Get("/managerCheck")
    async getManagerCheck(@Query('empid') empid:string):Promise<boolean>{
       return await this.userService.webManagerCheck(empid);
    }

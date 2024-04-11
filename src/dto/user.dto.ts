@@ -81,5 +81,9 @@ export class userDTO{
 
     @IsOptional()
     @IsString()
-    readonly differtime:string;
+    readonly differtime:number;
+
+    @IsOptional()
+    @IsNumber()
+    readonly appKey:number;
 }

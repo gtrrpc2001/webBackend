@@ -1,5 +1,10 @@
 import { wordNational } from 'src/interface/wordNational';
 import { isDefined } from 'class-validator';
+import { parentsEntity } from 'src/entity/parents.entity';
+import { ConfigService } from '@nestjs/config';
+import { firebasenoti } from './firebasenoti';
+import { commonFun } from 'src/clsfunc/commonfunc';
+import { Repository } from 'typeorm';
 
 export class alarmController{
   static getBody(address:string,time:string,timezone:string):string{
@@ -13,6 +18,33 @@ export class alarmController{
     }
   }
   
+  static getBleTitle(timezone:string):string{
+
+    switch(true){
+      case timezone?.includes('US'):
+        return `bluetooth of user`
+      case timezone?.includes('MO'):
+        return `用户蓝牙`          
+      default :
+        return `사용자 블루투스`
+    }                                                 
+  }
+
+  static getBleBody(activity:string,time:string,timezone:string):string{
+    const check = this.getBleActivityCheck(activity)
+    switch(true){
+      case timezone?.includes('US'):
+        return `${time} - ${activity}`
+      case timezone?.includes('MO'):
+        return `${time} - ${check ? '连接' : '断开'}`
+      default :      
+        return `${time} - ${check ? '연결' : '해제'}`
+    }                                                 
+  }
+
+  static getBleActivityCheck(activity:string):boolean{
+    return !activity.includes('Dis')
+  }
   
       static getTitle(arrStatus:string,bodystate:number,timezone:string):string{
 
@@ -82,5 +114,32 @@ export class alarmController{
             resultTime = afterTimes[1].split('.')
             return resultTime[0]
         } 
+      }
+
+      static async getSelToken(tokenRepository:Repository<parentsEntity>,eq:string) : Promise<parentsEntity[]>{
+        try{
+          const result = await tokenRepository.createQueryBuilder('parents')
+          .select('token')
+          .where({"eq":eq})
+          .getRawMany()
+          return result;
+        }catch(E){
+          console.log(E)
+        }    
+      }
+
+      static async callPushAlarm(parentsArr:parentsEntity[],body:any,configService:ConfigService,ble:boolean=false):Promise<boolean>{
+        try{
+          if(parentsArr.length != 0){
+            let tokens : string[] = commonFun.getTokens(parentsArr)
+            let i = 0;                
+            if(tokens.length != 0)
+              return await firebasenoti.PushNoti(tokens,body,configService,ble)
+            else
+              return false;
+           }
+        }catch{
+          return false;
+        }    
       }
 }

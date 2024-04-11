@@ -8,11 +8,11 @@ import { MoreThan,LessThan,In } from 'typeorm';
 import { commonQuery } from 'src/clsfunc/commonQuery';
 import { parentsEntity } from 'src/entity/parents.entity';
 import { firebasenoti } from 'src/alarm/firebasenoti';
-import { isDefined } from 'class-validator';
 import { ConfigService } from '@nestjs/config';
 import { userEntity } from 'src/entity/user.entity';
 import { ecg_csv_ecgdataEntity } from 'src/entity/ecg_csv_ecgdata.entity';
-
+import { ecg_byteEntity } from 'src/entity/ecg_byte.entity';
+import { alarmController } from 'src/alarm/alarmController';
 
 @Injectable()
 export class ecg_csv_ecgdata_arrService {
@@ -21,7 +21,7 @@ export class ecg_csv_ecgdata_arrService {
     @InjectRepository(ecg_csv_ecgdata_arrEntity) private ecg_csv_ecgdata_arrRepository:Repository<ecg_csv_ecgdata_arrEntity>,
     @InjectRepository(parentsEntity) private parentsRepository:Repository<parentsEntity>,
     @InjectRepository(userEntity) private userRepository:Repository<userEntity>,
-    @InjectRepository(ecg_csv_ecgdataEntity) private ecg_csv_ecgdataRepository:Repository<ecg_csv_ecgdataEntity>,
+    @InjectRepository(ecg_byteEntity) private ecg_byteRepository:Repository<ecg_byteEntity>,     
     private configService:ConfigService
     ){}
 
@@ -46,9 +46,8 @@ export class ecg_csv_ecgdata_arrService {
     try{    
         const arrInsert = await this.setInsert(body)  
         if(arrInsert){
-          const parentsArr = await this.getSelToken(body)                     
-          boolResult = await this.callPushAlarm(parentsArr,body)
-          //console.log(`boolean 값 안받아짐 -- ${boolResult}`)
+          const parentsArr = await alarmController.getSelToken(this.parentsRepository,body.eq)
+          boolResult = await alarmController.callPushAlarm(parentsArr,body,this.configService)          
         }        
         var jsonValue = `result =  ${boolResult}`
         return commonFun.converterJson(jsonValue);
@@ -57,34 +56,7 @@ export class ecg_csv_ecgdata_arrService {
         return E;
     }  
     
-  }  
-
-  async callPushAlarm(parentsArr:parentsEntity[],body:ecg_csv_ecgdataDTO):Promise<boolean>{
-    try{
-      if(parentsArr.length != 0){
-        let tokens : string[] = commonFun.getTokens(parentsArr)                
-        if(tokens.length != 0)        
-          return await firebasenoti.PushNoti(tokens,body,this.configService)          
-        else
-          return false;
-       }
-    }catch{
-      return false;
-    }
-    
-  }
-
-  async getSelToken(body:ecg_csv_ecgdataDTO) : Promise<parentsEntity[]>{
-    try{
-      const result = await this.parentsRepository.createQueryBuilder('parents')
-      .select('token')
-      .where({"eq":body.eq})
-      .getRawMany()
-      return result;
-    }catch(E){
-      console.log(E)
-    }    
-  }
+  }   
 
   async setInsert(body:ecg_csv_ecgdataDTO): Promise<boolean>{
     try{
@@ -110,64 +82,8 @@ export class ecg_csv_ecgdata_arrService {
         return Value;    
       } catch(E){
           console.log(E)
-      }                 
-    
+      }                     
    }
-
-   async arrWritetime (empid:string,startDate:string,endDate:string): Promise<string>{        
-    try{
-      let result
-      if(endDate != ''){
-        result = await this.ecg_csv_ecgdata_arrRepository.createQueryBuilder('ecg_csv_ecgdata_arr')
-                            .select('writetime,address')    
-                            .where({"eq":empid})
-                            .andWhere({"writetime":MoreThan(startDate)})
-                            .andWhere({"writetime":LessThan(endDate)})
-                            .getRawMany()
-      }else{
-        result = await this.ecg_csv_ecgdata_arrRepository.createQueryBuilder()
-                            .select('ecgpacket')    
-                            .where({"eq":empid})
-                            .andWhere({"writetime":startDate})
-                            .getRawMany()
-      }    
-      const Value = (result.length != 0 && empid != null)? commonFun.converterJson(result) : commonFun.converterJson('result = ' + '0')
-      console.log(empid)                                                    
-      return Value;    
-    } catch(E){
-        console.log(E)
-    }                 
-  
-  }
-   
-   async testArr (idx:number,empid:string,startDate:string,endDate:string): Promise<string>{        
-      try{
-        let result
-        if(startDate != ''){
-          result = await this.ecg_csv_ecgdata_arrRepository.createQueryBuilder('ecg_csv_ecgdata_arr')
-                              .select(this.testSel)    
-                              .where({"idx":MoreThan(idx)})
-                              .andWhere({"eq":empid})
-                              .andWhere({"writetime":MoreThan(startDate)})
-                              .andWhere({"writetime":LessThan(endDate)})
-                              .getRawMany()
-        }else{
-          result = await this.ecg_csv_ecgdata_arrRepository.createQueryBuilder()
-                              .select(this.testSel)    
-                              .where({"idx":MoreThan(idx)})
-                              .andWhere({"eq":empid})
-                              .andWhere({"writetime":LessThan(endDate)})
-                              .getRawMany()
-        }                                                   
-        
-        const Value = (result.length != 0 && empid != null)? commonFun.convertCsv(commonFun.converterJson(result)) : commonFun.converterJson('result = ' + '0')
-        console.log(empid)                              
-        return Value;    
-      } catch(E){
-          console.log(E)
-      }                 
-    
-   } 
 
    async onlyArrCount(empid:string,startDate:string,endDate:string): Promise<string>{
     try{
@@ -224,6 +140,61 @@ export class ecg_csv_ecgdata_arrService {
   }
  }
 
+   async arrWritetime (empid:string,startDate:string,endDate:string): Promise<string>{        
+    try{
+      let result
+      if(endDate != ''){
+        result = await this.ecg_csv_ecgdata_arrRepository.createQueryBuilder('ecg_csv_ecgdata_arr')
+                            .select('writetime,address')    
+                            .where({"eq":empid})
+                            .andWhere({"writetime":MoreThan(startDate)})
+                            .andWhere({"writetime":LessThan(endDate)})
+                            .getRawMany()
+      }else{
+        result = await this.ecg_csv_ecgdata_arrRepository.createQueryBuilder()
+                            .select('ecgpacket')    
+                            .where({"eq":empid})
+                            .andWhere({"writetime":startDate})
+                            .getRawMany()
+      }    
+      const Value = (result.length != 0 && empid != null)? commonFun.converterJson(result) : commonFun.converterJson('result = ' + '0')
+      console.log(empid)                                                    
+      return Value;    
+    } catch(E){
+        console.log(E)
+    }                 
+  
+  }
+   
+   async testArr (idx:number,empid:string,startDate:string,endDate:string): Promise<string>{        
+      try{
+        let result
+        if(startDate != ''){
+          result = await this.ecg_csv_ecgdata_arrRepository.createQueryBuilder('ecg_csv_ecgdata_arr')
+                              .select(this.testSel)    
+                              .where({"idx":MoreThan(idx)})
+                              .andWhere({"eq":empid})
+                              .andWhere({"writetime":MoreThan(startDate)})
+                              .andWhere({"writetime":LessThan(endDate)})
+                              .getRawMany()
+        }else{
+          result = await this.ecg_csv_ecgdata_arrRepository.createQueryBuilder()
+                              .select(this.testSel)    
+                              .where({"idx":MoreThan(idx)})
+                              .andWhere({"eq":empid})
+                              .andWhere({"writetime":LessThan(endDate)})
+                              .getRawMany()
+        }                                                   
+        
+        const Value = (result.length != 0 && empid != null)? commonFun.convertCsv(commonFun.converterJson(result)) : commonFun.converterJson('result = ' + '0')
+        console.log(empid)                              
+        return Value;    
+      } catch(E){
+          console.log(E)
+      }                 
+    
+   }    
+
  async arrPreEcgData (eq:string,date:string): Promise<string>{
   try{    
     const subQuery = await this.subQueryArr(eq,date)
@@ -244,7 +215,7 @@ export class ecg_csv_ecgdata_arrService {
   const subSelect = 'eq,writetime,ecgpacket'
   const onlyDate = writetime.split(' ')[0]
   try{
-    const result = await this.ecg_csv_ecgdataRepository.createQueryBuilder()
+    const result = await this.ecg_byteRepository.createQueryBuilder()
     .subQuery()
     .select(subSelect)
     .from(ecg_csv_ecgdataEntity,'')

@@ -1,20 +1,23 @@
 import { Entity, Column, PrimaryGeneratedColumn, Double, Int32 } from 'typeorm';
 
-@Entity('appversion')
-export class appversionEntity{
+@Entity('app_ble')
+export class app_bleEntity{
 
     @PrimaryGeneratedColumn()
     idx: number;
 
     @Column({type:'varchar'})
-    app:string;   
+    eq:string;
 
     @Column({type:'varchar'})
-    gubun:string;   
+    phone:string;
 
-    @Column({type:'int'})
-    versioncode:Int32;
+    @Column({type:'datetime'})
+    writetime:string;    
+    
+    @Column({type:'varchar'})
+    activity:string;
 
     @Column({type:'varchar'})
-    appkey:string;
+    serial:string;
 }

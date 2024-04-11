@@ -6,7 +6,6 @@ import { admin_login_logDTO } from 'src/dto/admin_login_log.dto';
 
 @Injectable()
 export class app_logService {
-  log_raws: app_logEntity[] = [];    
   constructor(@InjectRepository(app_logEntity) private app_logRepository:Repository<app_logEntity>){}
  
   async LogInsert(body:admin_login_logDTO): Promise<any>{   

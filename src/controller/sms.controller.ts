@@ -9,12 +9,7 @@ export class smsController {
   constructor(
     private readonly smsService: SmsService,    
     ) {}  
-
-  @Post("/api_getdata")
- async postAll(    
-   @Body() body: parentsDTO) {     
-    // return await this.smsService.sendSms(body);
-  }
+  
   @Get("/sendSMS")
  async getSendSMS(
     @Query('phone') phone: string,
@@ -29,18 +24,6 @@ export class smsController {
     @Query('code') code: number
     ): Promise<boolean> {            
     return await this.smsService.checkSMS(phone,code);   
-  }
+  } 
 
-  @Get("/Test")
- async getTest(
-    @Query('phone') phone: string,
-    @Query('nationalCode') nationalCode: number
- ): Promise<any> { 
-   return await this.smsService.sendSms(phone,nationalCode);
-  }
-
-//   @Post("/postTest")
-//  async postTest(body:): Promise<boolean> { 
-//    return await this.smsService.sendSms(phone,nationalCode);
-//   }
 }

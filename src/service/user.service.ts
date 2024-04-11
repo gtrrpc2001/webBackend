@@ -4,7 +4,7 @@ import { Repository } from 'typeorm';
 import { userDTO } from '../dto/user.dto';
 import { commonFun } from 'src/clsfunc/commonfunc';
 import { DeleteUserLogEntity,userEntity } from 'src/entity/user.entity';
-import { ecg_raw_history_lastEntity } from 'src/entity/ecg_raw_history_last.entity';
+import { delete_user_last_logEntity, ecg_raw_history_lastEntity } from 'src/entity/ecg_raw_history_last.entity';
 import { parentsEntity } from 'src/entity/parents.entity';
 import { isDefined } from 'class-validator';
 import { commonQuery } from 'src/clsfunc/commonQuery';
@@ -12,14 +12,14 @@ import { pwBcrypt } from 'src/clsfunc/pwAES';
 import { ConfigService } from '@nestjs/config';
 
 @Injectable()
-export class userService {
-  ecg_raws: userEntity[] = [];
+export class userService {  
   constructor(
   @InjectRepository(userEntity) private userRepository:Repository<userEntity>,
   @InjectRepository(ecg_raw_history_lastEntity) private ecg_raw_history_lastRepository:Repository<ecg_raw_history_lastEntity>,
   @InjectRepository(parentsEntity) private parentsRepository:Repository<parentsEntity>,
   @InjectRepository(DeleteUserLogEntity) private DeleteUserLogRepository:Repository<DeleteUserLogEntity>,
-    private configService:ConfigService
+  @InjectRepository(delete_user_last_logEntity) private delete_user_last_logRepository:Repository<delete_user_last_logEntity>,
+  private configService:ConfigService
   ){}
   
 
@@ -39,6 +39,10 @@ export class userService {
             return await this.updatePWD(body)
         case "deleteUser" :
             return await this.userDelete(body);
+        case "updateDifferTime" :
+            return await this.updateLogin_out(body.eq,body.differtime)
+        case "updateAppKey" :
+            return await this.updateAppKey(body.eq,body.appKey)
         case null  :
             return commonFun.converterJson('result = ' + false.toString());
 
@@ -49,7 +53,8 @@ export class userService {
   async userDelete(body:userDTO):Promise<boolean>{
     try{
         let bool = await this.setInsert(this.DeleteUserLogRepository,body);
-        if(bool)
+        let lastInsert = await this.setLastLogInsert(body.eq)
+        if(bool && lastInsert)
         {
             return await this.setDelete(body.eq)
         }else{
@@ -58,6 +63,39 @@ export class userService {
     }catch(E){
         console.log(E)
         return false;
+    }
+  }
+
+  async setLastLogInsert(eq:string):Promise<boolean>{
+    try{
+        const info = await this.getLastInfo(eq)
+        await this.delete_user_last_logRepository.createQueryBuilder()
+                        .insert()
+                        .into(delete_user_last_logEntity)
+                        .values([{
+                            eq:info.eq,eqname:info.eqname,writetime:info.writetime,timezone:info.timezone,bpm:info.bpm,hrv:info.hrv,
+                            cal:info.cal,calexe:info.calexe,step:info.step,distanceKM:info.distanceKM,arrcnt:info.arrcnt,
+                            temp:info.temp,battery:info.battery,bodystate:info.bodystate,isack:info.isack,log:info.log
+                        }])
+                        .execute()
+        return true;
+    }catch(E){
+        console.log(E)
+        return false;
+    }
+}
+
+async getLastInfo(eq:string):Promise<ecg_raw_history_lastEntity>{
+    try{
+        const result:ecg_raw_history_lastEntity = await this.ecg_raw_history_lastRepository
+                                                    .createQueryBuilder()
+                                                    .select('*')
+                                                    .where({"eq":eq})
+                                                    .getRawOne()
+        return result
+    }catch(E){
+        console.log(E)
+        return;
     }
   }
 
@@ -89,12 +127,32 @@ export class userService {
         .where({"eq":body.eq})
         .execute()
         boolResult = true
+
+        if(boolResult)
+            boolResult = await this.lastUpdate(body)
+
         var jsonValue = 'result = ' + boolResult.toString()
         console.log('setProfile')
         return commonFun.converterJson(jsonValue);
     }catch(E){
         console.log(E)
         return E;
+    }
+  }
+
+  async lastUpdate(body:userDTO):Promise<boolean>{
+    try{
+        await this.ecg_raw_history_lastRepository.createQueryBuilder()
+        .update(ecg_raw_history_lastEntity)
+        .set({
+            "eqname":body.eqname
+        })
+        .where({"eq":body.eq})
+        .execute()
+        return true;
+    }catch(E){
+        console.log(E)
+        return false;
     }
   }
 
@@ -147,30 +205,7 @@ export class userService {
         //프로필정보 -- 보호자 번호까지 받아옴    
         return await commonQuery.getProfile(this.userRepository,parentsEntity,empid)
            
-      }
-
-      async checkLogin(empid:string,pw:string,phone:string,token:string,destroy:boolean=false): Promise<string>{
-            try{ 
-                if(empid == "admin" && pw == "admin")
-                    destroy = true; boolResult = true;
-                
-                var boolResult:any = false
-                if(isDefined(phone)){
-                    boolResult = await this.CheckLoginGuardianApp(empid,pw,phone,token)
-                }else{
-                    boolResult = await this.checkPassword(empid,pw,destroy)
-                }
-
-                if(String(boolResult).includes('true') && !destroy)
-                    boolResult = await this.updateLogin_out(empid,1)
-                
-                var jsonValue = 'result = ' + boolResult.toString()
-                console.log(`${empid}------${pw}-----${jsonValue}`)    
-                return commonFun.converterJson(jsonValue);
-            }catch(E){
-                console.log(E)                
-            }
-        } 
+      }      
 
         async updateLogin_out(empid:string,loginNumber:number):Promise<boolean>{
             try{
@@ -186,21 +221,40 @@ export class userService {
             }
         }
 
+        async checkLogin(empid:string,pw:string,phone:string,token:string,destroy:boolean=false): Promise<string>{
+            if(empid == "admin" && pw == "admin")
+                 destroy = true;
+    
+            var boolResult:any = false
+            console.log('여기맞나' + phone)
+            if(isDefined(phone)){            
+                boolResult = await this.CheckLoginGuardianApp(empid,pw,phone,token)
+            }else{
+                boolResult = await this.checkPassword(empid,pw,destroy)
+            }
+            if(String(boolResult).includes('true') && !destroy &&!isDefined(phone))
+                boolResult = await this.updateLogin_out(empid,1)
+    
+    
+            var jsonValue = 'result = ' + boolResult.toString()
+            console.log(`${empid}------${pw}-----${jsonValue}`)    
+            return commonFun.converterJson(jsonValue);
+        }
+
         async checkPassword(empid:string,pw:string,destroy:boolean):Promise<any>{
             try{
                 const result:userEntity = await this.userRepository.createQueryBuilder('user')
-                                .select('password')    
+                                .select('password,differtime')    
                                 .where({"eq":empid})
                                 .getRawOne()
                 const password = result.password
-                const otherAppLoginCheck = destroy ? 0 : Number(result.differtime)                
-               return await this.login_outCheck(pw,password,otherAppLoginCheck);
+                const otherAppLoginCheck = destroy ? 0 : Number(result.differtime)              
+                return await this.login_outCheck(pw,password,otherAppLoginCheck);
             }catch(E){
                 console.log(E)
                 return false
-            }
-            
-        } 
+            }        
+        }
         
         async userCheckLogin(empid:string,pw:string):Promise<boolean>{
             try{
@@ -246,7 +300,7 @@ export class userService {
                                                         .getRawOne()
         
                 const {password,differtime} = result
-                const otherAppLoginCheck = differtime                
+                const otherAppLoginCheck = 0                                
                 return await this.login_outCheck(pw,password,otherAppLoginCheck);;
             }catch(E){
                 console.log(E)
@@ -324,7 +378,7 @@ export class userService {
         try{        
             const result = await this.userRepository.createQueryBuilder()
             .update(userEntity)        
-            .set({ "password":body.password})
+            .set({ "password":AESpwd})
             .where({"eq":body.eq})
             .execute()
             boolResult = true
@@ -337,7 +391,50 @@ export class userService {
         }             
     }
 
-  webManagerCheck = async(eq:string):Promise<boolean> => {
+    async checkPhone(phone:string):Promise<string>{
+        try{
+            var bool = false
+            const result = await this.userRepository.createQueryBuilder()
+                            .select('phone')
+                            .where({"phone":phone})
+                            .getRawMany()
+            if(result.length == 0)
+                bool = true
+            var jsonValue = 'result = ' + bool.toString()
+            console.log('checkPhone')
+            return commonFun.converterJson(jsonValue);
+        }catch(E){
+            console.log(E)
+        }
+    }
+
+    async getAppKey(empid:string):Promise<string>{
+        try{
+            const result:userEntity = await this.userRepository.createQueryBuilder('user')
+                            .select('appKey')    
+                            .where({"eq":empid})
+                            .getRawOne()            
+           return commonFun.converterJson(result.appKey);
+        }catch(E){
+            console.log(E)            
+        }        
+    }
+
+    async updateAppKey(empid:string,appKey:number):Promise<any>{
+        try{
+            const result = await this.userRepository.createQueryBuilder()
+                                        .update(userEntity)        
+                                        .set({ "appKey":appKey})
+                                        .where({"eq":empid})
+                                        .execute()
+            return true;
+        }catch(E){
+            console.log(E)
+            return false;
+        }
+    }
+
+     webManagerCheck = async(eq:string):Promise<boolean> => {
         try{
             const result = await this.userRepository.createQueryBuilder()
                             .select('eqname')
@@ -352,6 +449,7 @@ export class userService {
             return false;
         }
     }
+    
     
 }
 

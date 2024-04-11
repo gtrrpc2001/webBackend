@@ -7,8 +7,7 @@ import { commonFun } from 'src/clsfunc/commonfunc';
 import { ecg_csv_datadayEntity } from "src/entity/ecg_csv_dataday.entity";
 
 @Injectable()
-export class ecg_raw_history_lastService {
-  ecg_raws: ecg_raw_history_lastEntity[] = [];    
+export class ecg_raw_history_lastService {  
   constructor(@InjectRepository(ecg_raw_history_lastEntity) private ecg_raw_history_lastRepository:Repository<ecg_raw_history_lastEntity>,
   @InjectRepository(ecg_csv_datadayEntity) private ecg_csv_datadayRepository:Repository<ecg_csv_datadayEntity>
   ){}
@@ -20,9 +19,7 @@ export class ecg_raw_history_lastService {
         case null  :
             return false;
     } 
-  }
-
-  select = 'eq,eqname,writetime,hrv,cal,calexe,step,distanceKM,arrcnt,temp,eventcode,bodystate,isack,log'
+  }  
   
    async getEcg_raw_history_last(empid:string): Promise<string>{        
     const result: ecg_raw_history_lastEntity[] = await this.ecg_raw_history_lastRepository.createQueryBuilder('ecg_raw_history_last')
@@ -37,24 +34,46 @@ export class ecg_raw_history_lastService {
     
     }      
 
-    async gethistory_last(): Promise<string>{
+    async get_lastBpmTime(empid:string): Promise<string>{        
+      try{
+        const result:ecg_raw_history_lastEntity = await this.ecg_raw_history_lastRepository.createQueryBuilder('ecg_raw_history_last')
+                                                          .select('bpm,temp,writetime')    
+                                                          .where({"eq":empid})    
+                                                          .getRawOne()       
+        const Value = (result?.writetime != undefined && empid != null)? commonFun.converterJson(result) : commonFun.converterJson('result = ' + '0')      
+        return Value;
+      }catch(E){
+        console.log(E)
+      }    
+    }
+
+    async gethistory_last(eq:string): Promise<string>{
       const select = 'a.idx,a.eq,eqname,a.bpm,a.hrv,mid(a.temp,1,5) temp,'+
       'b.step step, b.distanceKM distanceKM, b.cal cal, b.calexe calexe, b.arrcnt arrcnt,a.timezone,'+
-      'a.writetime,'+
-      'case '+ 
+      'a.writetime,a.battery, '+
+      'case '+
       "when MID(a.timezone,1,1) = '-' then DATE_ADD(a.writetime,INTERVAL cast(MID(a.timezone,2,2) AS unsigned) + 9 HOUR)"+
       " when MID(a.timezone,1,1) = '+' AND cast(MID(a.timezone,2,2) AS UNSIGNED) < 9 AND a.timezone NOT LIKE '%KR%' then DATE_ADD(a.writetime,INTERVAL 9 - cast(MID(a.timezone,2,2) AS unsigned) HOUR)" +
       " when MID(a.timezone,1,1) = '+' AND cast(MID(a.timezone,2,2) AS UNSIGNED) > 9 then DATE_SUB(a.writetime,INTERVAL 9 - cast(MID(a.timezone,2,2) AS UNSIGNED) HOUR)"+
       ' ELSE a.writetime END'+
-      ' AS changeTime'              
+      ' AS changeTime'               
       try{
         const subQuery = await this.subQueryDataDay()
-        const result = await this.ecg_raw_history_lastRepository.createQueryBuilder('a')
-        .select(select)         
-        .leftJoin(subQuery,'b','a.eq = b.eq AND Mid(a.writetime,1,10) = b.writetime')
-        .orderBy('changeTime' ,'DESC')   
-        .getRawMany()  
-        
+        let result
+        if(eq != "admin"){
+          result = await this.ecg_raw_history_lastRepository.createQueryBuilder('a')
+          .select(select)         
+          .leftJoin(subQuery,'b','a.eq = b.eq AND Mid(a.writetime,1,10) = b.writetime')
+          .where({"eq":eq})
+          .orderBy('changeTime' ,'DESC')   
+          .getRawMany()  
+        }else{
+          result = await this.ecg_raw_history_lastRepository.createQueryBuilder('a')
+          .select(select)         
+          .leftJoin(subQuery,'b','a.eq = b.eq AND Mid(a.writetime,1,10) = b.writetime')         
+          .orderBy('changeTime' ,'DESC')   
+          .getRawMany()
+        }
         const Value = (result.length != 0)? commonFun.converterJson(result) : commonFun.converterJson('result = ' + '0')       
         
         return Value;

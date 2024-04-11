@@ -73,6 +73,19 @@ import { parentsEntity } from 'src/entity/parents.entity';
       return changeEcg
       }
 
+      static async getFromStringToNumberArrEcg(ecg:string): Promise<number[]>{
+        const changeEcg:number[] =[]                         
+        const after = ecg?.replaceAll(';','')                                
+        after?.split('][').forEach((data:string) => {
+                  const sliceEcg = data?.replaceAll('[','')?.replaceAll(']','')?.split(',')
+                  sliceEcg.forEach(d => {                            
+                  changeEcg.push(Number(d))
+                  
+              })
+          })   
+        return changeEcg
+      }
+
       static getStartLen(len:number):number{
         switch(len){
           case 10 :

@@ -20,9 +20,17 @@ export class ecg_raw_history_lastController {
     return await this.ecg_raw_history_lastService.getEcg_raw_history_last(eq);
   }
 
+  @Get("/lastBpmTime")
+ async getLastTime(       
+   @Query('eq') eq:string): Promise<string> {       
+    return await this.ecg_raw_history_lastService.get_lastBpmTime(eq);
+  }
+
   @Get("/webTable")
- async getTableListValue(): Promise<any> {       
-    return await this.ecg_raw_history_lastService.gethistory_last();
+ async getTableListValue(
+  @Query('eq') eq:string
+ ): Promise<any> {       
+    return await this.ecg_raw_history_lastService.gethistory_last(eq);
   }
 
 }
