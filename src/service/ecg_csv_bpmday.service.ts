@@ -55,7 +55,7 @@ export class ecg_csv_bpmdayService {
         const result = await this.ecg_raw_history_lastRepository.createQueryBuilder()
         .update(ecg_raw_history_lastEntity)        
         .set({"writetime":body.writetime ,"timezone":timezone ,"hrv":body.hrv,"cal":body.cal,"calexe":body.calexe,"step":body.step,
-          "distanceKM":body.distanceKM,"arrcnt":body.arrcnt,"temp":body.temp,"eventcode":body.eventcode,
+          "distanceKM":body.distanceKM,"arrcnt":body.arrcnt,"temp":body.temp,"battery":body.battery,
           "isack":body.isack,"log":body.log
           })
         .where({"eq":body.eq})

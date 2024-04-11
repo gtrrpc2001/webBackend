@@ -43,7 +43,7 @@ export class ecg_raw_history_lastEntity{
     temp:Double;
 
     @Column({type:'int'})
-    battery:string;
+    battery:Int32;
     
     @Column({type:'int'})
     bodystate:Int32;

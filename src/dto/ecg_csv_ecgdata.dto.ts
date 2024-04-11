@@ -93,7 +93,7 @@ export class ecg_csv_ecgdataDTO{
 
     @IsString()
     @IsOptional()
-    readonly eventcode:string;
+    readonly battery:number;
 
     @IsNumber()
     @IsOptional()
