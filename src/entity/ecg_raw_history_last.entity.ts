@@ -98,7 +98,7 @@ export class delete_user_last_logEntity{
     temp:Double;
 
     @Column({type:'int'})
-    battery:string;
+    battery:Int32;
     
     @Column({type:'int'})
     bodystate:Int32;
