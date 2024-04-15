@@ -5,11 +5,13 @@ import { Repository } from 'typeorm';
 import { ecg_raw_history_lastDTO } from "../dto/ecg_raw_history_last.dto";
 import { commonFun } from 'src/clsfunc/commonfunc';
 import { ecg_csv_datadayEntity } from "src/entity/ecg_csv_dataday.entity";
+import { ConfigService } from "@nestjs/config";
 
 @Injectable()
 export class ecg_raw_history_lastService {  
   constructor(@InjectRepository(ecg_raw_history_lastEntity) private ecg_raw_history_lastRepository:Repository<ecg_raw_history_lastEntity>,
-  @InjectRepository(ecg_csv_datadayEntity) private ecg_csv_datadayRepository:Repository<ecg_csv_datadayEntity>
+  @InjectRepository(ecg_csv_datadayEntity) private ecg_csv_datadayRepository:Repository<ecg_csv_datadayEntity>,
+  private config:ConfigService
   ){}
 
   async gubunKind(body:ecg_raw_history_lastDTO): Promise<any>{   
@@ -60,7 +62,7 @@ export class ecg_raw_history_lastService {
       try{
         const subQuery = await this.subQueryDataDay()
         let result
-        if(eq != "admin"){
+        if(eq != this.config.get<string>("ID")){
           result = await this.ecg_raw_history_lastRepository.createQueryBuilder('a')
           .select(select)         
           .leftJoin(subQuery,'b','a.eq = b.eq AND Mid(a.writetime,1,10) = b.writetime')

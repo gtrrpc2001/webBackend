@@ -222,9 +222,6 @@ async getLastInfo(eq:string):Promise<ecg_raw_history_lastEntity>{
         }
 
         async checkLogin(empid:string,pw:string,phone:string,token:string,destroy:boolean=false): Promise<string>{
-            if(empid == "admin" && pw == "admin")
-                 destroy = true;
-    
             var boolResult:any = false
             console.log('여기맞나' + phone)
             if(isDefined(phone)){            
