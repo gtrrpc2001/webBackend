@@ -290,15 +290,13 @@ async getLastInfo(eq:string):Promise<ecg_raw_history_lastEntity>{
             try{
                 let select = 'b.eq,b.phone,a.password,a.differtime'
                 let condition = `a.eq = b.eq and b.phone = ${phone}`                
-                const result = await this.userRepository.createQueryBuilder('a')
+                const result:userEntity = await this.userRepository.createQueryBuilder('a')
                                                         .select(select)
                                                         .innerJoin(parentsEntity,'b',condition)
-                                                        .where({"eq":empid}).andWhere({"password":pw})
+                                                        .where({"eq":empid})
                                                         .getRawOne()
-        
-                const {password,differtime} = result
                 const otherAppLoginCheck = 0                                
-                return await this.login_outCheck(pw,password,otherAppLoginCheck);;
+                return await this.login_outCheck(pw,result.password,otherAppLoginCheck);;
             }catch(E){
                 console.log(E)
                 return false;
