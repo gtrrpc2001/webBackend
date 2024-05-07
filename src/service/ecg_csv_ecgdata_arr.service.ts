@@ -49,7 +49,7 @@ export class ecg_csv_ecgdata_arrService {
           const parentsArr = await alarmController.getSelToken(this.parentsRepository,body.eq)
           boolResult = await alarmController.callPushAlarm(parentsArr,body,this.configService)          
         }        
-        var jsonValue = `result =  ${boolResult}`
+        var jsonValue = `result =  ${arrInsert}`
         return commonFun.converterJson(jsonValue);
     }catch(E){
         console.log(E)
