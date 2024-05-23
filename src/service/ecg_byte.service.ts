@@ -1,17 +1,15 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository ,MoreThanOrEqual,LessThanOrEqual,MoreThan,LessThan} from 'typeorm';
-import { commonFun } from "src/clsfunc/commonfunc";
-import { ecg_byteEntity } from 'src/entity/ecg_byte.entity';
-import { ecg_byteDTO } from 'src/dto/ecg_byte.dto';
-import { ecg_csv_ecgdataEntity } from 'src/entity/ecg_csv_ecgdata.entity';
-import { ecg_raw_history_lastEntity } from 'src/entity/ecg_raw_history_last.entity';
+import { commonFun } from "../clsfunc/commonfunc";
+import { ecg_byteEntity } from '../entity/ecg_byte.entity';
+import { ecg_byteDTO } from '../dto/ecg_byte.dto';
+import { ecg_raw_history_lastEntity } from '../entity/ecg_raw_history_last.entity';
 
 @Injectable()
 export class ecg_byteService {  
   constructor(
     @InjectRepository(ecg_byteEntity) private ecg_byteRepository:Repository<ecg_byteEntity>,
-  @InjectRepository(ecg_csv_ecgdataEntity) private ecg_csv_ecgdataRepository:Repository<ecg_csv_ecgdataEntity>,
   @InjectRepository(ecg_raw_history_lastEntity) private ecg_raw_history_lastRepository:Repository<ecg_raw_history_lastEntity>
   ){}
 
@@ -29,7 +27,8 @@ export class ecg_byteService {
 
   async insertEcgPacket(body:ecg_byteDTO): Promise<string>{
     var boolResult = false
-    try{                
+    try{          
+      // console.log(body.ecgPacket)
         const result = await this.setInsert(body)
         
         if(result){            
@@ -38,7 +37,8 @@ export class ecg_byteService {
         console.log('ecgByteinsert')
         var jsonValue = 'result = ' + boolResult.toString()        
         return commonFun.converterJson(jsonValue);
-    }catch(E){        
+    }catch(E){
+        //console.log(E) 
         return E;
     } 
   }  
@@ -60,7 +60,8 @@ export class ecg_byteService {
 
   async setInsert(body:ecg_byteDTO): Promise<boolean>{
     try{
-         const buffer = commonFun.getEcgBuffer(body.ecgPacket);                 
+         const buffer = commonFun.getEcgBuffer(body.ecgPacket);         
+        // ecgpacket:() => `HEX(AES_ENCRYPT('${body.ecgPacket}','${key}'))`
         const result = await this.ecg_byteRepository.createQueryBuilder()
         .insert()
         .into(ecg_byteEntity)
@@ -74,15 +75,7 @@ export class ecg_byteService {
         console.log(E)
         return false
     }
-  }   
-
-  async getChangeValue(result: any[]){
-     return result.map(d => {
-        const {writetime,ecgpacket} = d                                     
-        const ecg = commonFun.getEcgNumber(ecgpacket)
-        return {writetime,ecg}
-    });
-  }
+  }  
 
   async getEcgChangeValue(result: any[]):Promise<number[]>{
     let ecgArr:number[] = []    
@@ -94,40 +87,16 @@ export class ecg_byteService {
        })      
    });
     return ecgArr;
- }  
+ }
 
- async EcgToByte (idx:number,limit:number): Promise<number>{        
-  let index = 0;
-  try{      
-      const result:ecg_csv_ecgdataEntity[] = await this.ecg_csv_ecgdataRepository.createQueryBuilder('ecg_csv_ecgdata')
-                            .select('*')                                
-                            .where({"idx":MoreThan(index == 0 ? idx : index)})
-                            .orderBy("idx","ASC")
-                            .limit(limit)                            
-                            .getRawMany()
-      if(result.length != 0){        
-        for(var i = 0; i < result.length; i++){
-          const dR = result[i]
-          index = dR.idx
-          const eq = dR.eq
-          const writetime = dR.writetime
-          const timezone = dR.timezone
-          const bpm = Number(dR.bpm)
-          const ecg = dR.ecgpacket
-          const changeEcg:number[] = await commonFun.getFromStringToNumberArrEcg(ecg)          
-          const b:ecg_byteDTO = {"kind":"ecgByteInsert","eq":eq,"writetime":writetime,"timezone":timezone,"bpm":bpm,"ecgPacket":changeEcg}
-          await this.setInsert(b)            
-        }
-
-      }
-    console.log(index)
-    return index;    
-  } catch(E){
-      console.log(E)
-    return index;
-  }                
-
-}
+ async getGraphEcgChangeValue(result: ecg_byteEntity[]):Promise<{ecg: number[];writetime: string;}[]>{
+  let ecgArr = result.map(d => {
+     const {ecgpacket} = d                                     
+     const ecg = commonFun.getEcgNumber(ecgpacket)
+     return {ecg:ecg,writetime:d.writetime} 
+ });
+  return ecgArr;
+}  
 
  async getEcg (empid:string,startDate:string): Promise<number[]>{        
   try{
@@ -163,15 +132,15 @@ export class ecg_byteService {
 
 }
 
-async getGraphEcgValue(empid:string,startDate:string,endDate:string): Promise<number[]>{        
+async getGraphEcgValue(empid:string,startDate:string,endDate:string): Promise<any>{        
   try{
-     const result = await this.ecg_byteRepository.createQueryBuilder('ecg_byte')
-                          .select('ecgpacket')                                
+     const result:ecg_byteEntity[] = await this.ecg_byteRepository.createQueryBuilder('ecg_byte')
+                          .select('ecgpacket,Mid(writetime,15,19) as writetime')                                
                           .where({"eq":empid})
                           .andWhere({"writetime":MoreThanOrEqual(startDate)})
                           .andWhere({"writetime":LessThanOrEqual(endDate)})                                
-                          .getRawMany()                                               
-    const changeEcg:number[] = await this.getEcgChangeValue(result)                              
+                          .getRawMany()                                                   
+    const changeEcg = await this.getGraphEcgChangeValue(result)                                     
     return changeEcg;    
   } catch(E){
       console.log(E)
