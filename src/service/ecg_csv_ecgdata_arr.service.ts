@@ -217,7 +217,7 @@ export class ecg_csv_ecgdata_arrService {
     const result = await this.ecg_byteRepository.createQueryBuilder()
     .subQuery()
     .select(subSelect)
-    .from(ecg_csv_ecgdataEntity,'')
+    .from(ecg_byteEntity,'')
     .where(`eq = '${eq}'`)
     .andWhere(`writetime <= '${writetime}'`)
     .andWhere(`writetime >= '${onlyDate}'`)
