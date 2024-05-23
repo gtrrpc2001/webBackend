@@ -1,7 +1,7 @@
 import { Controller, Get,Post,Body,Query} from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
-import { ecg_byteDTO } from 'src/dto/ecg_byte.dto';
-import { ecg_byteService } from 'src/service/ecg_byte.service';
+import { ecg_byteDTO } from '../dto/ecg_byte.dto';
+import { ecg_byteService } from '../service/ecg_byte.service';
 
 @Controller('mslecgbyte')
 @ApiTags('mslecg')
@@ -12,15 +12,7 @@ export class ecg_byteController {
  async postAll(    
    @Body() body: ecg_byteDTO): Promise<any> {        
     return await this.ecg_byteService.gubunKind(body);
-  }
-
-  @Get("/stringECHToByte")
- async getChangeEcg(       
-   @Query('idx') idx:number,
-   @Query('limit') limit:number   
-   ): Promise<number> {       
-    return await this.ecg_byteService.EcgToByte(idx,limit);
-  }
+  } 
 
   @Get("/Ecg")
   async getEcg(       
@@ -44,8 +36,12 @@ export class ecg_byteController {
     @Query('eq') eq:string,
     @Query('startDate') startDate:string,
     @Query('endDate') endDate:string,
-    ): Promise<number[]> {       
+    ): Promise<any> {       
      return await this.ecg_byteService.getGraphEcgValue(eq,startDate,endDate);
    }
+
+   Test():string {     
+    return "ecg_byteTest";
+  }
 
 }
