@@ -189,7 +189,7 @@ async getLastInfo(eq:string):Promise<ecg_raw_history_lastEntity>{
                             .insert()
                             .into(userEntity)
                             .values([{
-                                eq:body.eq,password:body.password,eqname:body.eqname,email:body.email,phone:body.phone,sex:body.sex,
+                                eq:body.eq,password:AESpwd,eqname:body.eqname,email:body.email,phone:body.phone,sex:body.sex,
                                 height:body.height,weight:body.weight,age:body.age,birth:body.birth,sleeptime:body.sleeptime,
                                 uptime:body.uptime,bpm:body.bpm,step:body.step,distanceKM:body.distanceKM,
                                 cal:body.cal,calexe:body.calexe,alarm_sms:body.alarm_sms,differtime:body.differtime
