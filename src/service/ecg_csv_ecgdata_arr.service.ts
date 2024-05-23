@@ -10,7 +10,6 @@ import { parentsEntity } from 'src/entity/parents.entity';
 import { firebasenoti } from 'src/alarm/firebasenoti';
 import { ConfigService } from '@nestjs/config';
 import { userEntity } from 'src/entity/user.entity';
-import { ecg_csv_ecgdataEntity } from 'src/entity/ecg_csv_ecgdata.entity';
 import { ecg_byteEntity } from 'src/entity/ecg_byte.entity';
 import { alarmController } from 'src/alarm/alarmController';
 
