@@ -4,14 +4,14 @@ import {SmsService} from '../service/sms.service';
 import { smsController } from 'src/controller/sms.controller';
 import { smsEntity } from 'src/entity/sms.entity';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { userEntity } from 'src/entity/user.entity';
+import { UserEntity } from 'src/entity/user.entity';
 import { CachConfigService } from 'src/service/cache.service';
  
 
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([smsEntity,userEntity]),    
+    TypeOrmModule.forFeature([smsEntity,UserEntity]),    
     CacheModule.registerAsync({isGlobal:true, useClass:CachConfigService,inject:[CachConfigService]})
   ],
   providers: [

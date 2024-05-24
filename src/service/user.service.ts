@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { userDTO } from '../dto/user.dto';
 import { commonFun } from 'src/clsfunc/commonfunc';
-import { DeleteUserLogEntity,userEntity } from 'src/entity/user.entity';
+import { DeleteUserLogEntity,UserEntity } from 'src/entity/user.entity';
 import { delete_user_last_logEntity, ecg_raw_history_lastEntity } from 'src/entity/ecg_raw_history_last.entity';
 import { parentsEntity } from 'src/entity/parents.entity';
 import { isDefined } from 'class-validator';
@@ -14,7 +14,7 @@ import { ConfigService } from '@nestjs/config';
 @Injectable()
 export class userService {  
   constructor(
-  @InjectRepository(userEntity) private userRepository:Repository<userEntity>,
+  @InjectRepository(UserEntity) private userRepository:Repository<UserEntity>,
   @InjectRepository(ecg_raw_history_lastEntity) private ecg_raw_history_lastRepository:Repository<ecg_raw_history_lastEntity>,
   @InjectRepository(parentsEntity) private parentsRepository:Repository<parentsEntity>,
   @InjectRepository(DeleteUserLogEntity) private DeleteUserLogRepository:Repository<DeleteUserLogEntity>,
@@ -117,7 +117,7 @@ async getLastInfo(eq:string):Promise<ecg_raw_history_lastEntity>{
     var boolResult = false
     try{        
         const result = await this.userRepository.createQueryBuilder()
-        .update(userEntity)        
+        .update(UserEntity)        
         .set({
             "eqname":body.eqname,"email":body.email,"phone":body.phone,"sex":body.sex,"height":body.height,"weight":body.weight,
             "age":body.age,"birth":body.birth,"sleeptime":body.sleeptime,"uptime":body.uptime,"bpm":body.bpm,
@@ -187,7 +187,7 @@ async getLastInfo(eq:string):Promise<ecg_raw_history_lastEntity>{
         const AESpwd = await pwBcrypt.transformPassword(body.password)
         const result = await repository.createQueryBuilder()
                             .insert()
-                            .into(userEntity)
+                            .into(UserEntity)
                             .values([{
                                 eq:body.eq,password:AESpwd,eqname:body.eqname,email:body.email,phone:body.phone,sex:body.sex,
                                 height:body.height,weight:body.weight,age:body.age,birth:body.birth,sleeptime:body.sleeptime,
@@ -210,7 +210,7 @@ async getLastInfo(eq:string):Promise<ecg_raw_history_lastEntity>{
         async updateLogin_out(empid:string,loginNumber:number):Promise<boolean>{
             try{
                 const result = await this.userRepository.createQueryBuilder()
-                                                .update(userEntity)        
+                                                .update(UserEntity)        
                                                 .set({ "differtime":loginNumber})
                                                 .where({"eq":empid})
                                                 .execute()                                            
@@ -240,7 +240,7 @@ async getLastInfo(eq:string):Promise<ecg_raw_history_lastEntity>{
 
         async checkPassword(empid:string,pw:string,destroy:boolean):Promise<any>{
             try{
-                const result:userEntity = await this.userRepository.createQueryBuilder('user')
+                const result:UserEntity = await this.userRepository.createQueryBuilder('user')
                                 .select('password,differtime')    
                                 .where({"eq":empid})
                                 .getRawOne()
@@ -290,7 +290,7 @@ async getLastInfo(eq:string):Promise<ecg_raw_history_lastEntity>{
             try{
                 let select = 'b.eq,b.phone,a.password,a.differtime'
                 let condition = `a.eq = b.eq and b.phone = ${phone}`                
-                const result:userEntity = await this.userRepository.createQueryBuilder('a')
+                const result:UserEntity = await this.userRepository.createQueryBuilder('a')
                                                         .select(select)
                                                         .innerJoin(parentsEntity,'b',condition)
                                                         .where({"eq":empid})
@@ -329,7 +329,7 @@ async getLastInfo(eq:string):Promise<ecg_raw_history_lastEntity>{
     try{
         var boolResult = false    
         console.log('checkIDDupe') 
-        const result: userEntity[] = await this.userRepository.createQueryBuilder('user')
+        const result: UserEntity[] = await this.userRepository.createQueryBuilder('user')
                                             .select('eq')    
                                             .where({"eq":eq})    
                                             .getRawMany()
@@ -352,7 +352,7 @@ async getLastInfo(eq:string):Promise<ecg_raw_history_lastEntity>{
     async findID(name:string,phone:string,birth:string): Promise<string>{
         var boolResult = false            
         console.log('checkIDDupe') 
-        const result: userEntity[] = await this.userRepository.createQueryBuilder('user')
+        const result: UserEntity[] = await this.userRepository.createQueryBuilder('user')
                                     .select('eq')    
                                     .where({"eqname":name})
                                     .andWhere({"phone":phone})
@@ -372,7 +372,7 @@ async getLastInfo(eq:string):Promise<ecg_raw_history_lastEntity>{
         var boolResult = false
         try{        
             const result = await this.userRepository.createQueryBuilder()
-            .update(userEntity)        
+            .update(UserEntity)        
             .set({ "password":AESpwd})
             .where({"eq":body.eq})
             .execute()
@@ -405,7 +405,7 @@ async getLastInfo(eq:string):Promise<ecg_raw_history_lastEntity>{
 
     async getAppKey(empid:string):Promise<string>{
         try{
-            const result:userEntity = await this.userRepository.createQueryBuilder('user')
+            const result:UserEntity = await this.userRepository.createQueryBuilder('user')
                             .select('appKey')    
                             .where({"eq":empid})
                             .getRawOne()            
@@ -418,7 +418,7 @@ async getLastInfo(eq:string):Promise<ecg_raw_history_lastEntity>{
     async updateAppKey(empid:string,appKey:number):Promise<any>{
         try{
             const result = await this.userRepository.createQueryBuilder()
-                                        .update(userEntity)        
+                                        .update(UserEntity)        
                                         .set({ "appKey":appKey})
                                         .where({"eq":empid})
                                         .execute()

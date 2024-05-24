@@ -9,7 +9,7 @@ import * as crypto from 'crypto';
 import { Cache } from 'cache-manager';
 import { ConfigService } from '@nestjs/config';
 import axios from 'axios'
-import { userEntity } from 'src/entity/user.entity';
+import { UserEntity } from 'src/entity/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import {Repository,Like} from 'typeorm';
 import { smsEntity } from 'src/entity/sms.entity';
@@ -20,7 +20,7 @@ import * as dayjs from 'dayjs';
 export class SmsService{
     constructor(
         @InjectRepository(smsEntity) private smsRepository:Repository<smsEntity>,
-        @InjectRepository(userEntity) private userRepository:Repository<userEntity>,        
+        @InjectRepository(UserEntity) private userRepository:Repository<UserEntity>,        
         @Inject(CACHE_MANAGER) private cacheManager: Cache,
         private readonly config: ConfigService, // .env
       ) {}
