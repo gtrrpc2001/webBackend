@@ -117,13 +117,14 @@ export class ecg_csv_ecgdata_arrService {
     endDate: string,
   ): Promise<string> {
     try {
+      console.log(empid,startDate,endDate)
       const result = await this.ecg_csv_ecgdata_arrRepository
-        .createQueryBuilder('ecg_csv_ecgdata_arr')
-        .select('count(eq) as arrCnt')
+        .createQueryBuilder()
+        .select('COUNT(*) as arrCnt')
         .where({ eq: empid })
         .andWhere({ writetime: MoreThan(startDate) })
         .andWhere({ writetime: LessThan(endDate) })
-        .andWhere({ address:null })
+        .andWhere("address is null",{ address:null })
         .getRawOne();
       console.log(result);
       let Value =
