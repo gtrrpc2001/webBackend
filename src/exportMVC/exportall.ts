@@ -6,6 +6,7 @@ import { ecg_raw_history_lastModule } from "src/module/ecg_raw_history_last.modu
 import { admin_login_logModule } from "src/module/admin_login_log.module";
 import { parentsModule } from "src/module/parents.module";
 import { ConfigModule, ConfigService } from "@nestjs/config";
+import { PrometheusModule } from '@willsoto/nestjs-prometheus';
 import { MySqlMslConfigService } from "src/service/mysqlconfig.service";
 import { userModule } from "src/module/user.module";
 import { ecg_byteModule } from "src/module/ecg_byte.module";
@@ -13,29 +14,32 @@ import { appversionModule } from "src/module/appversion.module";
 import { smsModule } from "src/module/sms.module";
 import { app_logModule } from "src/module/app_log.module";
 import { app_bleModule } from "src/module/app_ble.module";
+import { ecg_stressModule } from "src/module/ecg_stress.module";
+import { PrometheusService } from "src/service/prometheus.service";
 
 
 
-export class allModule{
+export class allModule {
 
     static appImport = [
         ConfigModule.forRoot({
-            isGlobal:true,
-            envFilePath:'.env',
+            isGlobal: true,
+            envFilePath: '.env',
         }),
 
         TypeOrmModule.forRootAsync({
-            useClass:MySqlMslConfigService,
-            inject:[MySqlMslConfigService]
+            useClass: MySqlMslConfigService,
+            inject: [MySqlMslConfigService]
         }),
-            
-        ecg_csv_ecgdata_arrModule,ecg_csv_bpmdayModule,ecg_csv_datadayModule,
-        ecg_raw_history_lastModule,userModule,admin_login_logModule,
-        parentsModule,ecg_byteModule,appversionModule,smsModule,app_logModule,app_bleModule
-        
-        
+        PrometheusModule.registerAsync({ global: true, useClass: PrometheusService }),
+
+        ecg_csv_ecgdata_arrModule, ecg_csv_bpmdayModule, ecg_csv_datadayModule,
+        ecg_raw_history_lastModule, userModule, admin_login_logModule,
+        parentsModule, ecg_byteModule, appversionModule, smsModule, app_logModule, app_bleModule, ecg_stressModule
+
+
     ]
 }
-    
+
 
 

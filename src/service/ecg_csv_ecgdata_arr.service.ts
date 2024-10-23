@@ -10,6 +10,7 @@ import { ConfigService } from '@nestjs/config';
 import { UserEntity } from '../entity/user.entity';
 import { alarmController } from '../alarm/alarmController';
 import { ecg_byteEntity } from '../entity/ecg_byte.entity';
+import { UserCommonQuerycheckIDDupe } from './user.commonQuery';
 
 @Injectable()
 export class ecg_csv_ecgdata_arrService {
@@ -36,12 +37,11 @@ export class ecg_csv_ecgdata_arrService {
       case 'arrEcgInsert':
         return this.insertEcgPacket(body);
       case null:
-        return commonFun.converterJson('result = ' + false.toString());
+        return `result = ${false}`;
     }
   }
 
   async insertEcgPacket(body: ecg_csv_ecgdataDTO): Promise<string> {
-    var boolResult = false;
     try {
       const arrInsert = await this.setInsert(body);
       if (arrInsert) {
@@ -49,17 +49,16 @@ export class ecg_csv_ecgdata_arrService {
           this.parentsRepository,
           body.eq,
         );
-        boolResult = await alarmController.callPushAlarm(
+        await alarmController.callPushAlarm(
           parentsArr,
           body,
           this.configService,
         );
       }
-      var jsonValue = `result =  ${arrInsert}`;
-      return commonFun.converterJson(jsonValue);
+      return `result =  ${arrInsert}`;
     } catch (E) {
       console.log(E);
-      return E;
+      return E as string;
     }
   }
 
@@ -80,7 +79,7 @@ export class ecg_csv_ecgdata_arrService {
         ])
         .execute();
       console.log('arrinsert');
-      return true;
+      return result.identifiers.length > 0;
     } catch (E) {
       console.log(E);
     }
@@ -104,7 +103,7 @@ export class ecg_csv_ecgdata_arrService {
       const Value =
         result.length != 0 && empid != null
           ? commonFun.convertCsv(commonFun.converterJson(result))
-          : commonFun.converterJson('result = ' + '0');
+          : 'result = 0';
       return Value;
     } catch (E) {
       console.log(E);
@@ -117,24 +116,24 @@ export class ecg_csv_ecgdata_arrService {
     endDate: string,
   ): Promise<string> {
     try {
-      console.log(empid,startDate,endDate)
+      console.log(empid, startDate, endDate);
       const result = await this.ecg_csv_ecgdata_arrRepository
         .createQueryBuilder()
         .select('COUNT(*) as arrCnt')
         .where({ eq: empid })
         .andWhere({ writetime: MoreThan(startDate) })
         .andWhere({ writetime: LessThan(endDate) })
-        .andWhere("address is null",{ address:null })
+        .andWhere('address is null', { address: null })
         .getRawOne();
       console.log(result);
       let Value =
         result.length != 0 && empid != null
           ? commonFun.converterJson(result)
-          : commonFun.converterJson('result = ' + '0');
+          : 'result = 0';
       return Value;
     } catch (E) {
       console.log(E);
-      return commonFun.converterJson('result = ' + '0');
+      return 'result = 0';
     }
   }
 
@@ -145,7 +144,7 @@ export class ecg_csv_ecgdata_arrService {
   ): Promise<string> {
     try {
       let Value = await this.onlyArrCount(empid, startDate, endDate);
-      const info = await commonQuery.getProfile(
+      const info = await UserCommonQuerycheckIDDupe.getProfile(
         this.userRepository,
         parentsEntity,
         empid,
@@ -155,10 +154,8 @@ export class ecg_csv_ecgdata_arrService {
         const arr = Value?.replace('{', '');
         const profile = info?.replace('}', ',');
         Value = profile + arr;
-      }
-      console.log(Value);
+      }      
       return Value;
-      //return Value
     } catch (E) {
       console.log(E);
     }
@@ -186,7 +183,7 @@ export class ecg_csv_ecgdata_arrService {
       const Value =
         result.length != 0 && empid != null
           ? commonFun.converterJson(result)
-          : commonFun.converterJson('result = ' + '0');
+          : 'result = 0';
       return Value;
     } catch (E) {
       console.log(E);
@@ -219,7 +216,7 @@ export class ecg_csv_ecgdata_arrService {
       const Value =
         result.length != 0 && empid != null
           ? commonFun.converterJson(result)
-          : commonFun.converterJson('result = ' + '0');
+          : 'result = 0';
       console.log(empid);
       return Value;
     } catch (E) {
@@ -256,7 +253,7 @@ export class ecg_csv_ecgdata_arrService {
       const Value =
         result.length != 0 && empid != null
           ? commonFun.convertCsv(commonFun.converterJson(result))
-          : commonFun.converterJson('result = ' + '0');
+          : 'result = 0';
       console.log(empid);
       return Value;
     } catch (E) {
@@ -281,7 +278,7 @@ export class ecg_csv_ecgdata_arrService {
       const Value =
         result.length != 0 && eq != null
           ? commonFun.converterJson(result)
-          : commonFun.converterJson('result = ' + '0');
+          : 'result = 0';
       return Value;
     } catch (E) {
       console.log(E);
