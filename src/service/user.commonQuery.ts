@@ -1,5 +1,5 @@
 import { isDefined } from 'class-validator';
-import { UserEntity } from 'entity/user.entity';
+import { UserEntity } from '../entity/user.entity';
 import { Repository } from 'typeorm';
 
 export class UserCommonQuerycheckIDDupe {
