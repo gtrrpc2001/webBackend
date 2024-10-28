@@ -91,7 +91,7 @@ export class ecg_raw_history_lastService {
           .where({ eq: eq })
           .orderBy('changeTime', 'DESC')
           .getRawMany();
-      } else if (eq != this.config.get<string>('BUSINESS')) {
+      } else if (eq == this.config.get<string>('BUSINESS')) {
         // 요양병원 테스트용
         result = await this.ecg_raw_history_lastRepository
           .createQueryBuilder('a')
