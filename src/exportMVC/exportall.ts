@@ -16,6 +16,7 @@ import { app_logModule } from "src/module/app_log.module";
 import { app_bleModule } from "src/module/app_ble.module";
 import { ecg_stressModule } from "src/module/ecg_stress.module";
 import { PrometheusService } from "src/service/prometheus.service";
+import { Hospital_patientModule } from "src/service/hospital_patient.module";
 
 
 
@@ -35,7 +36,7 @@ export class allModule {
 
         ecg_csv_ecgdata_arrModule, ecg_csv_bpmdayModule, ecg_csv_datadayModule,
         ecg_raw_history_lastModule, userModule, admin_login_logModule,
-        parentsModule, ecg_byteModule, appversionModule, smsModule, app_logModule, app_bleModule, ecg_stressModule
+        parentsModule, ecg_byteModule, appversionModule, smsModule, app_logModule, app_bleModule, ecg_stressModule, hospital
 
 
     ]
