@@ -79,7 +79,7 @@ export class ecg_raw_history_lastService {
     try {
       const subQuery = await this.subQueryDataDay();
       let result;
-      if (eq != this.config.get<string>('ID') && eq != String(this.config.get<string>('BUSINESS'))) {
+      if (eq != this.config.get<string>('ID') && eq != String(this.config.get<string>('BUSINESS')) && eq != String(this.config.get<string>('BUSINESS2'))) {
         result = await this.ecg_raw_history_lastRepository
           .createQueryBuilder('a')
           .select(select)
@@ -105,7 +105,22 @@ export class ecg_raw_history_lastService {
           .where({ isack: 1 })
           .orderBy('changeTime', 'DESC')
           .getRawMany();
-      } else {
+      } else if (eq == String(this.config.get<string>('BUSINESS2'))) {
+        // 요양병원 테스트용
+        console.log("test")
+        result = await this.ecg_raw_history_lastRepository
+          .createQueryBuilder('a')
+          .select(select)
+          .leftJoin(
+            subQuery,
+            'b',
+            'a.eq = b.eq AND Mid(a.writetime,1,10) = b.writetime',
+          )
+          .where({ isack: 2 })
+          .orderBy('changeTime', 'DESC')
+          .getRawMany();
+      }
+      else {
         result = await this.ecg_raw_history_lastRepository
           .createQueryBuilder('a')
           .select(select)
