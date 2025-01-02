@@ -1,0 +1,77 @@
+name: Deploy to cloudtype
+on:
+  push:
+    branches:
+      - main
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Connect deploy key
+        uses: cloudtype-github-actions/connect@v1
+        with:
+          token: ${{ secrets.CLOUDTYPE_TOKEN }}
+          ghtoken: ${{ secrets.GHP_TOKEN }}
+      - name: Deploy
+        uses: cloudtype-github-actions/deploy@v1
+        with:
+          token: ${{ secrets.CLOUDTYPE_TOKEN }}
+          project: gtrrpc2001/msl_web_backend
+          stage: main
+          yaml: >
+            name: webbackend
+
+            app: node@22
+
+            options:
+              env:
+                - name: NODE_ENV
+                  value: production
+                - name: HOST
+                  value: ${{ secrets.HOST }}
+                - name: PORT
+                  value: ${{ secrets.PORT }}
+                - name: NAME
+                  value: ${{ secrets.NAME }}
+                - name: PASSWORD
+                  value: ${{ secrets.PASSWORD }}
+                - name: DATABASE
+                  value: ${{ secrets.DATABASE }}
+                - name: NAVER_ACCESSKEY
+                  value: ${{ secrets.NAVER_ACCESSKEY }}
+                - name: NAVER_SECRETKEY
+                  value: ${{ secrets.NAVER_SECRETKEY }}
+                - name: NAVER_SERVICEID
+                  value: ${{ secrets.NAVER_SERVICEID }}
+                - name: COMPANYNUMBER
+                  value: ${{ secrets.COMPANYNUMBER }}
+                - name: MANAGER
+                  value: ${{ secrets.MANAGER }}
+                - name: REDISHOST
+                  value: ${{ secrets.REDISHOST }}
+                - name: REDISPORT
+                  value: ${{ secrets.REDISPORT }}
+                - name: REDISDB
+                  value: ${{ secrets.REDISDB }}
+                - name: ID
+                  value: ${{ secrets.ID }}
+                - name: PROMETHEUS_PATH
+                  value: ${{ secrets.PROMETHEUS_PATH }}
+                - name: BUSINESS
+                  value: ${{ secrets.BUSINESS }}
+                - name: BUSINESS2
+                  value: ${{ secrets.BUSINESS2 }}
+              ports: ${{ secrets.MAIN_PORT }}
+              build: npm run build
+              start: npm run start:prod
+              install: npm install --save @nestjs/typeorm typeorm mysql2  @nestjs/serve-static
+                @nestjs/cache-manager cache-manager; npm install bcrypt; npm install -D
+                @types/bcrypt; npm i --save @nestjs/axios axios
+              buildenv: []
+            context:
+              git:
+                url: git@github.com:${{ github.repository }}.git
+                ref: ${{ github.ref }}
+              preset: nest.js
